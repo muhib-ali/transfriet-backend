@@ -161,6 +161,7 @@ export class PermissionsController {
     description: "Module ID to filter permissions",
     example: "8af18c09-a3c0-4aeb-b730-6d489bfb26d6",
   })
+  @ApiQuery({ name: "search", required: false, type: String, description: "Optional search term" })
   async getAll(@Query(ValidationPipe) filterDto: PermissionFilterDto) {
     return this.permissionsService.getAll(filterDto);
   }

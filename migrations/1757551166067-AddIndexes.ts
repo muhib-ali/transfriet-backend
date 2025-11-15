@@ -36,8 +36,8 @@ export class AddIndexes1757551166067 implements MigrationInterface {
       `CREATE INDEX IF NOT EXISTS "IDX_roles_slug" ON "roles" ("slug")`
     );
     await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS "IDX_taxes_slug" ON "taxes" ("slug")`
-    );
+  `CREATE INDEX IF NOT EXISTS "IDX_taxes_title" ON "taxes" ("title")`
+);
 
     // --- Optional client/product/category indexes (guarded) ---
     await queryRunner.query(`
@@ -54,8 +54,8 @@ export class AddIndexes1757551166067 implements MigrationInterface {
     await queryRunner.query(`
       DO $$
       BEGIN
-        IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'categories' AND relkind = 'r') THEN
-          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_categories_title" ON "categories" ("title")';
+        IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'job_files' AND relkind = 'r') THEN
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_job_files_title" ON "job_files" ("title")';
         END IF;
       END
       $$;
@@ -65,9 +65,8 @@ export class AddIndexes1757551166067 implements MigrationInterface {
       DO $$
       BEGIN
         IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'products' AND relkind = 'r') THEN
-          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_products_slug" ON "products" ("slug")';
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_products_title" ON "products" ("title")';
-          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_products_category_id" ON "products" ("category_id")';
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_products_job_file_id" ON "products" ("job_file_id")';
         END IF;
       END
       $$;
@@ -121,7 +120,7 @@ await queryRunner.query(`
       -- helpful filters/sorts
       EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_created_at"   ON "invoices" ("created_at")';
       EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_customer_id"  ON "invoices" ("customer_id")';
-      EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_category_id"  ON "invoices" ("category_id")';
+      EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_job_file_id"  ON "invoices" ("job_file_id")';
       EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_quotation_id" ON "invoices" ("quotation_id")';
       -- UNIQUE already makes an index, but safe to ensure name-based lookups:
       EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_invoice_number" ON "invoices" ("invoice_number")';
@@ -194,21 +193,20 @@ await queryRunner.query(`DROP INDEX IF EXISTS "IDX_iitems_invoice_id"`);
 // invoices
 await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_invoice_number"`);
 await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_quotation_id"`);
-await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_category_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_job_file_id"`);
 await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_customer_id"`);
 await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_created_at"`);
 
 
     // Optional client/product/category indexes
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_products_category_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_products_job_file_id"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_products_title"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_products_slug"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_categories_title"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_job_files_title"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_clients_name"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_clients_email"`);
 
     // Core auth / RBAC
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_taxes_slug"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_taxes_title"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_roles_slug"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_modules_slug"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_permissions_slug"`);

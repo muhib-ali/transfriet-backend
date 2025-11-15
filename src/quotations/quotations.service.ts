@@ -8,10 +8,11 @@ import { QuotationItem } from "../entities/quotation-item.entity";
 import { CreateQuotationDto } from "./dto/create-quotation.dto";
 import { UpdateQuotationDto } from "./dto/update-quotation.dto";
 import { PaginationDto } from "../common/dto/pagination.dto";
+import { QuotationListQueryDto } from "./dto/quotation-list-query.dto";
 import { ResponseHelper } from "../common/helpers/response.helper";
 import { ApiResponse, PaginatedApiResponse } from "../common/interfaces/api-response.interface";
 import { Client } from "../entities/client.entity";
-import { Category } from "../entities/category.entity";
+import { JobFile } from "../entities/job-file.entity";
 import { Subcategory } from "../entities/subcategory.entity";
 import { Tax } from "../entities/tax.entity";
 import { QuoteCounter } from "../entities/quote-counter.entity";
@@ -54,10 +55,10 @@ export class QuotationsService {
       const customer = await qr.manager.findOne(Client, { where: { id: dto.customer_id } });
       if (!customer) throw new BadRequestException("Invalid customer_id");
 
-      let category: Category | null = null;
-      if (dto.category_id) {
-        category = await qr.manager.findOne(Category, { where: { id: dto.category_id } });
-        if (!category) throw new BadRequestException("Invalid category_id");
+      let jobFile: JobFile | null = null;
+      if (dto.job_file_id) {
+        jobFile = await qr.manager.findOne(JobFile, { where: { id: dto.job_file_id } });
+        if (!jobFile) throw new BadRequestException("Invalid job_file_id");
       }
 
       let subcategories: Subcategory[] = [];
@@ -91,13 +92,14 @@ export class QuotationsService {
         quote_number,
         valid_until: dto.valid_until ? new Date(dto.valid_until) : null,
         customer,                 // relation object
-        category: category ?? null,
+        category: jobFile ?? null,
         subcategories,            // many-to-many
         shipper_name: dto.shipper_name ?? null,
         consignee_name: dto.consignee_name ?? null,
         pieces_or_containers: dto.pieces_or_containers ?? null,
         weight_volume: dto.weight_volume ?? null,
         cargo_description: dto.cargo_description ?? null,
+        master_bill_no: dto.master_bill_no ?? null,
         loading_place: dto.loading_place ?? null,
         departure_date: dto.departure_date ? new Date(dto.departure_date) : null,
         destination: dto.destination ?? null,
@@ -160,12 +162,12 @@ export class QuotationsService {
         (base as any).customer = c;
       }
 
-      if (dto.category_id !== undefined) {
-        if (dto.category_id === null as any) (base as any).category = null;
+      if (dto.job_file_id !== undefined) {
+        if (dto.job_file_id === null as any) (base as any).category = null;
         else {
-          const cat = await qr.manager.findOne(Category, { where: { id: dto.category_id! } });
-          if (!cat) throw new BadRequestException("Invalid category_id");
-          (base as any).category = cat;
+          const jf = await qr.manager.findOne(JobFile, { where: { id: dto.job_file_id! } });
+          if (!jf) throw new BadRequestException("Invalid job_file_id");
+          (base as any).category = jf;
         }
       }
 
@@ -188,6 +190,7 @@ export class QuotationsService {
       set("weight_volume", dto.weight_volume ?? base.weight_volume);
       set("cargo_description", dto.cargo_description ?? base.cargo_description);
       set("loading_place", dto.loading_place ?? base.loading_place);
+      set("master_bill_no", dto.master_bill_no ?? base.master_bill_no);
       set("departure_date", dto.departure_date ? new Date(dto.departure_date) : base.departure_date);
       set("destination", dto.destination ?? base.destination);
       set("arrival_date", dto.arrival_date ? new Date(dto.arrival_date) : base.arrival_date);
@@ -233,7 +236,7 @@ export class QuotationsService {
 
       const withRels = await this.quotationRepo.findOne({
         where: { id: saved.id },
-        relations: ["customer", "category", "subcategories", "items"],
+      relations: ["customer", "category", "subcategories", "items"],
       });
 
       return ResponseHelper.success(withRels!, "Quotation updated successfully", "Quotation", 200);
@@ -261,21 +264,50 @@ export class QuotationsService {
     );
   }
 
-  async getAll(p: PaginationDto): Promise<PaginatedApiResponse<Quotation>> {
+  async getAll(p: QuotationListQueryDto): Promise<PaginatedApiResponse<Quotation>> {
     const page = p.page ?? 1;
     const limit = p.limit ?? 10;
     const skip = (page - 1) * limit;
 
-    const [rows, total] = await this.quotationRepo.findAndCount({
-      skip,
-      take: limit,
-      order: { created_at: "DESC" },
-      relations: ["customer", "category", "subcategories"],
-    });
+    const qb = this.quotationRepo
+      .createQueryBuilder("q")
+      .leftJoinAndSelect("q.customer", "customer")
+      .leftJoinAndSelect("q.category", "job_file")
+      .leftJoinAndSelect("q.subcategories", "sub")
+      .orderBy("q.created_at", "DESC")
+      .distinct(true)
+      .skip(skip)
+      .take(limit);
+
+    if (p.search && p.search.length > 0) {
+      const term = `%${p.search}%`;
+      qb.andWhere(
+        `(
+          q.quote_number ILIKE :term OR
+          q.shipper_name ILIKE :term OR
+          q.consignee_name ILIKE :term OR
+          q.master_bill_no ILIKE :term OR
+          q.destination ILIKE :term OR
+          customer.name ILIKE :term OR
+          
+          customer.email ILIKE :term OR
+          job_file.title ILIKE :term OR
+          sub.title ILIKE :term
+        )`,
+        { term }
+      );
+    }
+
+    const [rows, total] = await qb.getManyAndCount();
 
     return ResponseHelper.paginated(
-      rows, page, limit, total, "quotations",
-      "Quotations retrieved successfully", "Quotation"
+      rows,
+      page,
+      limit,
+      total,
+      "quotations",
+      "Quotations retrieved successfully",
+      "Quotation"
     );
   }
 

@@ -9,7 +9,7 @@ import { CreateClientDto } from "./dto/create-client.dto";
 import { UpdateClientDto } from "./dto/update-client.dto";
 import { DeleteClientDto } from "./dto/delete-client.dto";
 import { ClientResponseDto, ClientsListResponseDto } from "./dto/client-response.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { ClientListQueryDto } from "./dto/client-list-query.dto";
 
 @ApiTags("Clients")
 @ApiBearerAuth("JWT-auth")
@@ -66,8 +66,9 @@ export class ClientsController {
 @ApiResponse({ status: 200, description: "Clients retrieved successfully", type: ClientsListResponseDto })
 @ApiQuery({ name: "page", required: false, type: Number, description: "Page number" })
 @ApiQuery({ name: "limit", required: false, type: Number, description: "Items per page" })
-async getAll(@Query(ValidationPipe) paginationDto: PaginationDto) {
-  return this.clientsService.getAll(paginationDto);
+@ApiQuery({ name: "search", required: false, type: String, description: "Optional search term" })
+async getAll(@Query(ValidationPipe) query: ClientListQueryDto) {
+  return this.clientsService.getAll(query);
 }
 
   @Delete("delete")

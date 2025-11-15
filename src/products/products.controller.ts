@@ -5,7 +5,7 @@ import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { DeleteProductDto } from "./dto/delete-product.dto";
 import { ProductResponseDto, ProductsListResponseDto } from "./dto/product-response.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { ProductListQueryDto } from "./dto/product-list-query.dto";
 
 @ApiTags("Products")
 @ApiBearerAuth("JWT-auth")
@@ -16,7 +16,7 @@ export class ProductsController {
   @Post("create")
   @ApiOperation({ summary: "Create new product" })
   @ApiResponse({ status: 201, description: "Product created successfully", type: ProductResponseDto })
-  @ApiResponse({ status: 400, description: "Bad Request - slug already exists" })
+  @ApiResponse({ status: 400, description: "Bad Request - title already exists" })
   @ApiBody({ type: CreateProductDto })
   async create(@Body(ValidationPipe) dto: CreateProductDto) {
     return this.productsService.create(dto);
@@ -26,6 +26,7 @@ export class ProductsController {
   @ApiOperation({ summary: "Update product" })
   @ApiResponse({ status: 200, description: "Product updated successfully", type: ProductResponseDto })
   @ApiResponse({ status: 404, description: "Product not found" })
+  @ApiResponse({ status: 400, description: "Bad Request - title already exists" })
   @ApiBody({ type: UpdateProductDto })
   async update(@Body(ValidationPipe) dto: UpdateProductDto) {
     return this.productsService.update(dto);
@@ -45,8 +46,9 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: "Products retrieved successfully", type: ProductsListResponseDto })
   @ApiQuery({ name: "page", required: false, type: Number, description: "Page number" })
   @ApiQuery({ name: "limit", required: false, type: Number, description: "Items per page" })
-  async getAll(@Query(ValidationPipe) paginationDto: PaginationDto) {
-    return this.productsService.getAll(paginationDto);
+  @ApiQuery({ name: "search", required: false, type: String, description: "Optional search term" })
+  async getAll(@Query(ValidationPipe) query: ProductListQueryDto) {
+    return this.productsService.getAll(query);
   }
 
   @Delete("delete")

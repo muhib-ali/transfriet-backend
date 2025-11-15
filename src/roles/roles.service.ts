@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, Brackets } from "typeorm";
 import { Role } from "../entities/role.entity";
 import { RolePermission } from "../entities/role-permission.entity";
 import { Permission } from "../entities/permission.entity";
@@ -12,7 +12,7 @@ import { Module } from "../entities/module.entity";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { UpdateRoleDto } from "./dto/update-role.dto";
 import { UpdateRolePermissionsDto } from "./dto/role-permissions.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { RoleListQueryDto } from "./dto/role-list-query.dto";
 import { ResponseHelper } from "../common/helpers/response.helper";
 import {
   ApiResponse,
@@ -126,17 +126,24 @@ export class RolesService {
     return ResponseHelper.success(role, "Role retrieved successfully", "Role");
   }
 
-  async getAll(
-    paginationDto: PaginationDto
-  ): Promise<PaginatedApiResponse<Role>> {
-    const { page = 1, limit = 10 } = paginationDto;
+  async getAll(query: RoleListQueryDto): Promise<PaginatedApiResponse<Role>> {
+    const { page = 1, limit = 10, search } = query;
     const skip = (page - 1) * limit;
 
-    const [roles, total] = await this.roleRepository.findAndCount({
-      order: { created_at: "DESC" },
-      skip,
-      take: limit,
-    });
+    const qb = this.roleRepository.createQueryBuilder("role")
+      .orderBy("role.created_at", "DESC")
+      .skip(skip)
+      .take(limit);
+
+    if (search && search.trim() !== "") {
+      const term = `%${search.trim()}%`;
+      qb.andWhere(new Brackets((sub) => {
+        sub.where("role.title ILIKE :search", { search: term })
+          .orWhere("role.slug ILIKE :search", { search: term });
+      }));
+    }
+
+    const [roles, total] = await qb.getManyAndCount();
 
     return ResponseHelper.paginated(
       roles,

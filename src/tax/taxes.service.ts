@@ -5,7 +5,7 @@ import { Tax } from "../entities/tax.entity";
 import { CreateTaxDto } from "./dto/create-tax.dto";
 import { UpdateTaxDto } from "./dto/update-tax.dto";
 import { DeleteTaxDto } from "./dto/delete-tax.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { TaxListQueryDto } from "./dto/tax-list-query.dto";
 import { ResponseHelper } from "../common/helpers/response.helper";
 import { ApiResponse, PaginatedApiResponse } from "../common/interfaces/api-response.interface";
 
@@ -21,23 +21,23 @@ export class TaxesService {
   constructor(@InjectRepository(Tax) private taxRepo: Repository<Tax>) {}
 
   async create(dto: CreateTaxDto): Promise<ApiResponse<Tax>> {
-    const { title, slug } = dto;
+    const { title } = dto;
     const value = clampPercent(dto.value);
-    const exists = await this.taxRepo.findOne({ where: { slug } });
-    if (exists) throw new BadRequestException("Tax with this slug already exists");
-    const entity = this.taxRepo.create({ title: title.trim(), slug: slug.trim(), value });
+    const exists = await this.taxRepo.findOne({ where: { title: title.trim() } });
+    if (exists) throw new BadRequestException("Tax with this title already exists");
+    const entity = this.taxRepo.create({ title: title.trim(), value });
     const saved = await this.taxRepo.save(entity);
     return ResponseHelper.success(saved, "Tax created successfully", "Tax", 201);
   }
 
   async update(dto: UpdateTaxDto): Promise<ApiResponse<Tax>> {
-    const { id, title, slug } = dto;
+    const { id, title } = dto;
     const value = clampPercent(dto.value);
     const current = await this.taxRepo.findOne({ where: { id } });
     if (!current) throw new NotFoundException("Tax not found");
-    const conflict = await this.taxRepo.findOne({ where: { slug } });
-    if (conflict && conflict.id !== id) throw new BadRequestException("Tax with this slug already exists");
-    await this.taxRepo.update(id, { title: title.trim(), slug: slug.trim(), value });
+    const conflict = await this.taxRepo.findOne({ where: { title: title.trim() } });
+    if (conflict && conflict.id !== id) throw new BadRequestException("Tax with this title already exists");
+    await this.taxRepo.update(id, { title: title.trim(), value });
     const updated = await this.taxRepo.findOne({ where: { id } });
     return ResponseHelper.success(updated!, "Tax updated successfully", "Tax", 200);
   }
@@ -48,10 +48,23 @@ export class TaxesService {
     return ResponseHelper.success(tax, "Tax retrieved successfully", "Tax", 200);
   }
 
-  async getAll(paginationDto: PaginationDto): Promise<PaginatedApiResponse<Tax>> {
-    const { page = 1, limit = 10 } = paginationDto;
+  async getAll(query: TaxListQueryDto): Promise<PaginatedApiResponse<Tax>> {
+    const { page = 1, limit = 10, search } = query;
     const skip = (page - 1) * limit;
-    const [items, total] = await this.taxRepo.findAndCount({ skip, take: limit, order: { created_at: "DESC" } });
+
+    const qb = this.taxRepo
+      .createQueryBuilder("tax")
+      .orderBy("tax.created_at", "DESC")
+      .skip(skip)
+      .take(limit);
+
+    if (search && search.trim() !== "") {
+      const term = `%${search.trim()}%`;
+      qb.where("tax.title ILIKE :search", { search: term })
+        .orWhere("CAST(tax.value AS TEXT) ILIKE :search", { search: term });
+    }
+
+    const [items, total] = await qb.getManyAndCount();
     return ResponseHelper.paginated(items, page, limit, total, "taxes", "Taxes retrieved successfully", "Tax");
   }
 

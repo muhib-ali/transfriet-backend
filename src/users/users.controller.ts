@@ -24,7 +24,7 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { DeleteUserDto } from "./dto/delete-user.dto";
 import { UserResponseDto, UsersListResponseDto } from "./dto/user-response.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { UserListQueryDto } from "./dto/user-list-query.dto";
 
 @ApiTags("Users")
 @ApiBearerAuth("JWT-auth")
@@ -149,8 +149,9 @@ export class UsersController {
     type: Number,
     description: "Items per page",
   })
-  async getAll(@Query(ValidationPipe) paginationDto: PaginationDto) {
-    return this.usersService.getAll(paginationDto);
+  @ApiQuery({ name: "search", required: false, type: String, description: "Optional search term" })
+  async getAll(@Query(ValidationPipe) query: UserListQueryDto) {
+    return this.usersService.getAll(query);
   }
 
   @Delete("delete")

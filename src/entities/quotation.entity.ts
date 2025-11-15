@@ -3,7 +3,7 @@ import {
   ManyToMany, JoinTable, OneToMany, JoinColumn
 } from "typeorm";
 import { Client } from "./client.entity";
-import { Category } from "./category.entity";
+import { JobFile } from "./job-file.entity";
 import { Subcategory } from "./subcategory.entity";
 import { QuotationItem } from "./quotation-item.entity";
 
@@ -38,10 +38,10 @@ export class Quotation {
   @JoinColumn({ name: "customer_id" })
   customer: Client;
 
-  // FK name MUST be category_id
-  @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL" })
-  @JoinColumn({ name: "category_id" })
-  category: Category | null;
+  // FK name updated to job_file_id
+  @ManyToOne(() => JobFile, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "job_file_id" })
+  category: JobFile | null;
 
   // Many subcategories via join table
   @ManyToMany(() => Subcategory, (s) => s.quotations, { cascade: false })

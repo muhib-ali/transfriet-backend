@@ -3,6 +3,7 @@ import {
   ArrayMinSize, IsDateString, IsBoolean
 } from "class-validator";
 import { Type } from "class-transformer";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 class UpdateQuotationItemDto {
   @IsUUID() product_id: string;
@@ -12,32 +13,36 @@ class UpdateQuotationItemDto {
 }
 
 export class UpdateQuotationDto {
+  @ApiPropertyOptional()
   @IsUUID() id: string;
 
-  @IsOptional() @IsDateString() valid_until?: string | null;
-  @IsOptional() @IsUUID() customer_id?: string;
-  @IsOptional() @IsUUID() category_id?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsDateString() valid_until?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsUUID() customer_id?: string;
+  @ApiPropertyOptional() @IsOptional() @IsUUID() job_file_id?: string | null;
 
   // ✅ multi
+  @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @IsUUID("4", { each: true })
   subcategory_ids?: string[] | null;
 
-  @IsOptional() @IsString() shipper_name?: string | null;
-  @IsOptional() @IsString() consignee_name?: string | null;
-  @IsOptional() @IsNumber() @Min(0) pieces_or_containers?: number | null;
-  @IsOptional() @IsString() weight_volume?: string | null;
-  @IsOptional() @IsString() cargo_description?: string | null;
-  @IsOptional() @IsString() loading_place?: string | null;
-  @IsOptional() @IsDateString() departure_date?: string | null;
-  @IsOptional() @IsString() destination?: string | null;
-  @IsOptional() @IsDateString() arrival_date?: string | null;
-  @IsOptional() @IsString() final_destination?: string | null;
-  @IsOptional() @IsString() notes?: string | null;
-  @IsOptional() @IsBoolean() isInvoiceCreated?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsString() shipper_name?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() consignee_name?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() @Min(0) pieces_or_containers?: number | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() weight_volume?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() cargo_description?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() master_bill_no?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() loading_place?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsDateString() departure_date?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() destination?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsDateString() arrival_date?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() final_destination?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() notes?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() isInvoiceCreated?: boolean;
 
+  @ApiPropertyOptional({ type: () => [UpdateQuotationItemDto] })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)

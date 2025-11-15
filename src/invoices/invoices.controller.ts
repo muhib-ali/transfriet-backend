@@ -11,6 +11,7 @@ import { UpdateInvoiceDto } from "./dto/update-invoice.dto";
 import { DeleteInvoiceDto } from "./dto/delete-invoice.dto";
 import { InvoiceResponseDto, InvoicesListResponseDto } from "./dto/invoice-response.dto";
 import { PaginationDto } from "../common/dto/pagination.dto";
+import { InvoiceListQueryDto } from "./dto/invoice-list-query.dto";
 
 @ApiTags("Invoices")
 @ApiBearerAuth("JWT-auth")
@@ -47,7 +48,8 @@ export class InvoicesController {
   @ApiResponse({ status: 200, type: InvoicesListResponseDto })
   @ApiQuery({ name: "page", required: false, type: Number })
   @ApiQuery({ name: "limit", required: false, type: Number })
-  async getAll(@Query(ValidationPipe) pagination: PaginationDto) {
+  @ApiQuery({ name: "search", required: false, type: String })
+  async getAll(@Query(ValidationPipe) pagination: InvoiceListQueryDto) {
     return this.invoicesService.getAll(pagination);
   }
 

@@ -4,14 +4,14 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, Brackets } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { User } from "../entities/user.entity";
 import { Role } from "../entities/role.entity";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { DeleteUserDto } from "./dto/delete-user.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { UserListQueryDto } from "./dto/user-list-query.dto";
 import { ResponseHelper } from "../common/helpers/response.helper";
 import {
   ApiResponse,
@@ -163,22 +163,30 @@ export class UsersService {
     );
   }
 
-  async getAll(
-    paginationDto: PaginationDto
-  ): Promise<PaginatedApiResponse<Omit<User, "password">>> {
-    const { page = 1, limit = 10 } = paginationDto;
+  async getAll(query: UserListQueryDto): Promise<PaginatedApiResponse<Omit<User, "password">>> {
+    const { page = 1, limit = 10, search } = query;
     const skip = (page - 1) * limit;
 
-    const [users, total] = await this.userRepository.findAndCount({
-      skip,
-      take: limit,
-      relations: ["role"],
-      order: { created_at: "DESC" },
-    });
+    const qb = this.userRepository.createQueryBuilder("user")
+      .leftJoinAndSelect("user.role", "role")
+      .orderBy("user.created_at", "DESC")
+      .skip(skip)
+      .take(limit);
 
-    // Remove passwords from response
+    if (search && search.trim() !== "") {
+      const term = `%${search.trim()}%`;
+      qb.andWhere(new Brackets((sub) => {
+        sub.where("user.name ILIKE :search", { search: term })
+          .orWhere("user.email ILIKE :search", { search: term })
+          .orWhere("role.title ILIKE :search", { search: term })
+          .orWhere("role.slug ILIKE :search", { search: term });
+      }));
+    }
+
+    const [users, total] = await qb.getManyAndCount();
+
     const usersWithoutPasswords = users.map((user) => {
-      const { password, ...userWithoutPassword } = user;
+      const { password, ...userWithoutPassword } = user as any;
       return userWithoutPassword;
     });
 

@@ -26,7 +26,7 @@ import {
   ModuleResponseDto,
   ModulesListResponseDto,
 } from "./dto/module-response.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { ModuleListQueryDto } from "./dto/module-list-query.dto";
 
 @ApiTags("Modules")
 @ApiBearerAuth("JWT-auth")
@@ -141,8 +141,9 @@ export class ModulesController {
     type: Number,
     description: "Items per page",
   })
-  async getAll(@Query(ValidationPipe) paginationDto: PaginationDto) {
-    return this.modulesService.getAll(paginationDto);
+  @ApiQuery({ name: "search", required: false, type: String, description: "Optional search term" })
+  async getAll(@Query(ValidationPipe) query: ModuleListQueryDto) {
+    return this.modulesService.getAll(query);
   }
 
   @Delete("delete")

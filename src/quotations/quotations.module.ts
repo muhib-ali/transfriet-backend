@@ -5,7 +5,7 @@ import { QuotationsService } from "./quotations.service";
 import { Quotation } from "../entities/quotation.entity";
 import { QuotationItem } from "../entities/quotation-item.entity";
 import { Client } from "../entities/client.entity";
-import { Category } from "../entities/category.entity";
+import { JobFile } from "../entities/job-file.entity";
 import { Subcategory } from "../entities/subcategory.entity";
 import { Product } from "../entities/product.entity";
 import { Tax } from "../entities/tax.entity";
@@ -17,7 +17,7 @@ import { QuoteCounter } from "../entities/quote-counter.entity";
       Quotation,
       QuotationItem,
       Client,
-      Category,
+      JobFile,
       Subcategory,
       Product,
       Tax,

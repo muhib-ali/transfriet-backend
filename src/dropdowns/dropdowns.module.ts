@@ -8,7 +8,7 @@ import { AuthModule } from "../auth/auth.module";
 import { Product } from "../entities/product.entity";
 import { Tax } from "../entities/tax.entity";
 import { Client } from "../entities/client.entity";
-import { Category } from "../entities/category.entity";
+import { JobFile } from "../entities/job-file.entity";
 import { Subcategory } from "../entities/subcategory.entity";
 // import { AuthModule } from "../auth/auth.module";
 
@@ -19,7 +19,7 @@ import { Subcategory } from "../entities/subcategory.entity";
     Product,
     Tax,
     Client,
-    Category,
+    JobFile,
     Subcategory,]), AuthModule],
   controllers: [DropdownsController],
   providers: [DropdownsService],

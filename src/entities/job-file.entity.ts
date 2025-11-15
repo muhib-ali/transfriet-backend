@@ -3,9 +3,9 @@ import { BaseAuditColumns } from "./base-audit-columns.entity";
 import { Product } from "./product.entity";
 import { Quotation } from "./quotation.entity";
 
-@Entity("categories")
+@Entity("job_files")
 @Unique(["title"])
-export class Category extends BaseAuditColumns {
+export class JobFile extends BaseAuditColumns {
   @Column({ type: "varchar" })
   title: string;
 
@@ -18,4 +18,6 @@ export class Category extends BaseAuditColumns {
 
    @OneToMany(() => Quotation, (q) => q.category)
   quotations: Quotation[];
+
+  
 }

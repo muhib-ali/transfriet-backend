@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class CategoryDto {
+export class JobFileDto {
   @ApiProperty() id: string;
   @ApiProperty() title: string;
   @ApiProperty({ nullable: true }) description: string | null;
@@ -12,23 +12,23 @@ export class CategoryDto {
   @ApiProperty() updated_at: Date;
 }
 
-export class CategoryResponseDto {
+export class JobFileResponseDto {
   @ApiProperty({ example: 200 }) statusCode: number;
   @ApiProperty({ example: true }) status: boolean;
-  @ApiProperty({ example: "Category retrieved successfully" }) message: string;
-  @ApiProperty({ example: "Category" }) heading: string;
-  @ApiProperty({ type: CategoryDto }) data: CategoryDto;
+  @ApiProperty({ example: "Job file retrieved successfully" }) message: string;
+  @ApiProperty({ example: "Job File" }) heading: string;
+  @ApiProperty({ type: JobFileDto }) data: JobFileDto;
 }
 
-export class CategoriesListResponseDto {
+export class JobFilesListResponseDto {
   @ApiProperty({ example: 200 }) statusCode: number;
   @ApiProperty({ example: true }) status: boolean;
-  @ApiProperty({ example: "Categories retrieved successfully" }) message: string;
-  @ApiProperty({ example: "Category" }) heading: string;
+  @ApiProperty({ example: "Job files retrieved successfully" }) message: string;
+  @ApiProperty({ example: "Job File" }) heading: string;
   @ApiProperty({
     type: "object",
     properties: {
-      categories: { type: "array", items: { $ref: "#/components/schemas/CategoryDto" } },
+      job_files: { type: "array", items: { $ref: "#/components/schemas/JobFileDto" } },
       pagination: {
         type: "object",
         properties: {
@@ -45,7 +45,7 @@ export class CategoriesListResponseDto {
     },
   })
   data: {
-    categories: CategoryDto[];
+    job_files: JobFileDto[];
     pagination: {
       page: number; limit: number; total: number; totalPages: number;
       hasNext: boolean; hasPrev: boolean; nextPage: number | null; prevPage: number | null;

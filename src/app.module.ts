@@ -25,7 +25,7 @@ import { RolePermission } from "./entities/role-permission.entity";
 import { OauthToken } from "./entities/oauth-token.entity";
 import { TaxesModule } from "./tax/taxes.module";
 import { ClientsModule } from './clients/clients.modules';
-import { CategoriesModule } from "./categories/categories.module";
+import { JobFilesModule } from "./job_files/job_files.module";
 import { ProductsModule } from "./products/products.module";
 import { SubcategoriesModule } from "./subcategories/subcategories.module";
 import { QuotationsModule } from "./quotations/quotations.module";
@@ -115,7 +115,7 @@ import { InvoicesModule } from "./invoices/invoices.module";
     HealthModule,
     TaxesModule,
     ClientsModule,
-    CategoriesModule,
+    JobFilesModule,
     ProductsModule,
     SubcategoriesModule,
     QuotationsModule,

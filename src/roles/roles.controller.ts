@@ -28,7 +28,7 @@ import {
   RolePermissionsResponseDto,
 } from "./dto/role-permissions.dto";
 import { RoleResponseDto, RolesListResponseDto } from "./dto/role-response.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { RoleListQueryDto } from "./dto/role-list-query.dto";
 
 @ApiTags("Roles")
 @ApiBearerAuth("JWT-auth")
@@ -116,8 +116,9 @@ export class RolesController {
     type: RolesListResponseDto,
   })
   @ApiResponse({ status: 401, description: "Unauthorized" })
-  async getAll(@Query(ValidationPipe) paginationDto: PaginationDto) {
-    return this.rolesService.getAll(paginationDto);
+  @ApiQuery({ name: "search", required: false, type: String, description: "Optional search term" })
+  async getAll(@Query(ValidationPipe) query: RoleListQueryDto) {
+    return this.rolesService.getAll(query);
   }
 
   @Delete("delete")

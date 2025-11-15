@@ -8,7 +8,7 @@ import { ApiResponse } from "../common/interfaces/api-response.interface";
 import { Product } from "../entities/product.entity";
 import { Tax } from "../entities/tax.entity";
 import { Client } from "../entities/client.entity";
-import { Category } from "../entities/category.entity";
+import { JobFile } from "../entities/job-file.entity";
 import { Subcategory } from "../entities/subcategory.entity";
 
 @Injectable()
@@ -24,8 +24,8 @@ export class DropdownsService {
     private taxRepository: Repository<Tax>,
     @InjectRepository(Client) 
     private clientRepository: Repository<Client>,
-    @InjectRepository(Category) 
-    private categoryRepository: Repository<Category>,
+    @InjectRepository(JobFile) 
+    private jobFileRepository: Repository<JobFile>,
     @InjectRepository(Subcategory)
     private subcategoryRepository: Repository<Subcategory>,
   ) {}
@@ -120,14 +120,14 @@ export class DropdownsService {
     return ResponseHelper.success({ clientsDropdown }, "Clients dropdown data retrieved successfully", "Dropdowns");
   }
 
-  async getAllCategories(): Promise<ApiResponse<any>> {
-    const rows = await this.categoryRepository.find({
+  async getAllJobFiles(): Promise<ApiResponse<any>> {
+    const rows = await this.jobFileRepository.find({
       where: { is_active: true },
       select: ["id", "title"],
       order: { title: "ASC" },
     });
-    const categoriesDropdown = rows.map(c => ({ label: c.title, value: c.id }));
-    return ResponseHelper.success({ categoriesDropdown }, "Categories dropdown data retrieved successfully", "Dropdowns");
+    const jobFilesDropdown = rows.map(c => ({ label: c.title, value: c.id }));
+    return ResponseHelper.success({ jobFilesDropdown }, "Job files dropdown data retrieved successfully", "Dropdowns");
   }
 
   async getAllSubcategories(): Promise<ApiResponse<any>> {

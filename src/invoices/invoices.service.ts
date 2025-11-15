@@ -8,10 +8,11 @@ import { InvoiceItem } from "../entities/invoice-item.entity";
 import { CreateInvoiceDto } from "./dto/create-invoice.dto";
 import { UpdateInvoiceDto } from "./dto/update-invoice.dto";
 import { PaginationDto } from "../common/dto/pagination.dto";
+import { InvoiceListQueryDto } from "./dto/invoice-list-query.dto";
 import { ResponseHelper } from "../common/helpers/response.helper";
 import { ApiResponse, PaginatedApiResponse } from "../common/interfaces/api-response.interface";
 import { Client } from "../entities/client.entity";
-import { Category } from "../entities/category.entity";
+import { JobFile } from "../entities/job-file.entity";
 import { Subcategory } from "../entities/subcategory.entity";
 import { Tax } from "../entities/tax.entity";
 import { InvoiceCounter } from "../entities/invoice-counter.entity";
@@ -77,10 +78,10 @@ export class InvoicesService {
     const customer = await qr.manager.findOne(Client, { where: { id: dto.customer_id } });
     if (!customer) throw new BadRequestException("Invalid customer_id");
 
-    let category: Category | null = null;
-    if (dto.category_id) {
-      category = await qr.manager.findOne(Category, { where: { id: dto.category_id } });
-      if (!category) throw new BadRequestException("Invalid category_id");
+    let jobFile: JobFile | null = null;
+    if (dto.job_file_id) {
+      jobFile = await qr.manager.findOne(JobFile, { where: { id: dto.job_file_id } });
+      if (!jobFile) throw new BadRequestException("Invalid job_file_id");
     }
 
     let subcategories: Subcategory[] = [];
@@ -134,7 +135,7 @@ export class InvoicesService {
       valid_until: dto.valid_until ? new Date(dto.valid_until) : null,
       quotation: quotation ?? null,
       customer,
-      category: category ?? null,
+      category: jobFile ?? null,
       subcategories,
       shipper_name: dto.shipper_name ?? null,
       consignee_name: dto.consignee_name ?? null,
@@ -218,12 +219,12 @@ export class InvoicesService {
         (base as any).customer = c;
       }
 
-      if (dto.category_id !== undefined) {
-        if (dto.category_id === null as any) (base as any).category = null;
+      if (dto.job_file_id !== undefined) {
+        if (dto.job_file_id === null as any) (base as any).category = null;
         else {
-          const cat = await qr.manager.findOne(Category, { where: { id: dto.category_id! } });
-          if (!cat) throw new BadRequestException("Invalid category_id");
-          (base as any).category = cat;
+          const jf = await qr.manager.findOne(JobFile, { where: { id: dto.job_file_id! } });
+          if (!jf) throw new BadRequestException("Invalid job_file_id");
+          (base as any).category = jf;
         }
       }
 
@@ -288,7 +289,7 @@ export class InvoicesService {
 
       const withRels = await this.invoiceRepo.findOne({
         where: { id: saved.id },
-        relations: ["quotation", "customer", "category", "subcategories", "items"],
+      relations: ["quotation", "customer", "category", "subcategories", "items"],
       });
 
       return ResponseHelper.success(withRels!, "Invoice updated successfully", "Invoice", 200);
@@ -316,19 +317,50 @@ export class InvoicesService {
     );
   }
 
-  async getAll(p: PaginationDto): Promise<PaginatedApiResponse<Invoice>> {
+  async getAll(p: InvoiceListQueryDto): Promise<PaginatedApiResponse<Invoice>> {
     const page = p.page ?? 1;
     const limit = p.limit ?? 10;
     const skip = (page - 1) * limit;
 
-    const [rows, total] = await this.invoiceRepo.findAndCount({
-      skip, take: limit, order: { created_at: "DESC" },
-      relations: ["quotation", "customer", "category", "subcategories"],
-    });
+    const qb = this.invoiceRepo
+      .createQueryBuilder("i")
+      .leftJoinAndSelect("i.quotation", "quotation")
+      .leftJoinAndSelect("i.customer", "customer")
+      .leftJoinAndSelect("i.category", "job_file")
+      .leftJoinAndSelect("i.subcategories", "sub")
+      .orderBy("i.created_at", "DESC")
+      .distinct(true)
+      .skip(skip)
+      .take(limit);
+
+    if (p.search && p.search.length > 0) {
+      const term = `%${p.search}%`;
+      qb.andWhere(
+        `(
+          i.invoice_number ILIKE :term OR
+          i.shipper_name ILIKE :term OR
+          i.consignee_name ILIKE :term OR
+          i.master_bill_no ILIKE :term OR
+          i.destination ILIKE :term OR
+          customer.name ILIKE :term OR
+          customer.email ILIKE :term OR
+          job_file.title ILIKE :term OR
+          sub.title ILIKE :term
+        )`,
+        { term }
+      );
+    }
+
+    const [rows, total] = await qb.getManyAndCount();
 
     return ResponseHelper.paginated(
-      rows, page, limit, total, "invoices",
-      "Invoices retrieved successfully", "Invoice"
+      rows,
+      page,
+      limit,
+      total,
+      "invoices",
+      "Invoices retrieved successfully",
+      "Invoice"
     );
   }
 

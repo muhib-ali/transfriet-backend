@@ -4,12 +4,12 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, Brackets } from "typeorm";
 import { Module } from "../entities/module.entity";
 import { CreateModuleDto } from "./dto/create-module.dto";
 import { UpdateModuleDto } from "./dto/update-module.dto";
 import { DeleteModuleDto } from "./dto/delete-module.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { ModuleListQueryDto } from "./dto/module-list-query.dto";
 import { ResponseHelper } from "../common/helpers/response.helper";
 import {
   ApiResponse,
@@ -104,17 +104,25 @@ export class ModulesService {
     );
   }
 
-  async getAll(
-    paginationDto: PaginationDto
-  ): Promise<PaginatedApiResponse<Module>> {
-    const { page = 1, limit = 10 } = paginationDto;
+  async getAll(query: ModuleListQueryDto): Promise<PaginatedApiResponse<Module>> {
+    const { page = 1, limit = 10, search } = query;
     const skip = (page - 1) * limit;
 
-    const [modules, total] = await this.moduleRepository.findAndCount({
-      skip,
-      take: limit,
-      order: { created_at: "DESC" },
-    });
+    const qb = this.moduleRepository.createQueryBuilder("module")
+      .orderBy("module.created_at", "DESC")
+      .skip(skip)
+      .take(limit);
+
+    if (search && search.trim() !== "") {
+      const term = `%${search.trim()}%`;
+      qb.andWhere(new Brackets((sub) => {
+        sub.where("module.title ILIKE :search", { search: term })
+          .orWhere("module.slug ILIKE :search", { search: term })
+          .orWhere("module.description ILIKE :search", { search: term });
+      }));
+    }
+
+    const [modules, total] = await qb.getManyAndCount();
 
     return ResponseHelper.paginated(
       modules,

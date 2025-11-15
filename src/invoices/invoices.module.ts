@@ -5,7 +5,7 @@ import { InvoicesService } from "./invoices.service";
 import { Invoice } from "../entities/invoice.entity";
 import { InvoiceItem } from "../entities/invoice-item.entity";
 import { Client } from "../entities/client.entity";
-import { Category } from "../entities/category.entity";
+import { JobFile } from "../entities/job-file.entity";
 import { Subcategory } from "../entities/subcategory.entity";
 import { Product } from "../entities/product.entity";
 import { Tax } from "../entities/tax.entity";
@@ -19,7 +19,7 @@ import { QuotationItem } from "../entities/quotation-item.entity";
       Invoice,
       InvoiceItem,
       Client,
-      Category,
+      JobFile,
       Subcategory,
       Product,
       Tax,

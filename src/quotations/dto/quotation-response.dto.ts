@@ -14,7 +14,8 @@ export class QuotationDto {
   @ApiProperty() quote_number: string;
   @ApiProperty({ nullable: true }) valid_until: string | null;
   @ApiProperty() customer_id: string;
-  @ApiProperty({ nullable: true }) category_id: string | null;
+  @ApiProperty({ nullable: true }) master_bill_no: string | null;
+  @ApiProperty({ nullable: true }) job_file_id: string | null;
   @ApiProperty({ nullable: true }) subcategory_id: string | null;
   @ApiProperty({ nullable: true }) shipper_name: string | null;
   @ApiProperty({ nullable: true }) consignee_name: string | null;

@@ -3,7 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class TaxDto {
   @ApiProperty() id: string;
   @ApiProperty({ description: "Tax title", example: "VAT" }) title: string;
-  @ApiProperty({ description: "Unique slug", example: "vat" }) slug: string;
+  // @ApiProperty({ description: "Unique slug", example: "vat" }) slug: string;
   @ApiProperty({ description: "Tax percentage value (0-100)", example: 17.0 }) value: number;
   @ApiProperty({ description: "Is active", example: true }) is_active: boolean;
   @ApiProperty({ description: "Created by", nullable: true }) created_by: string | null;

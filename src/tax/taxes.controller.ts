@@ -23,7 +23,7 @@ import { CreateTaxDto } from "./dto/create-tax.dto";
 import { UpdateTaxDto } from "./dto/update-tax.dto";
 import { DeleteTaxDto } from "./dto/delete-tax.dto";
 import { TaxResponseDto, TaxesListResponseDto } from "./dto/tax-response.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { TaxListQueryDto } from "./dto/tax-list-query.dto";
 
 @ApiTags("Taxes")
 @ApiBearerAuth("JWT-auth")
@@ -40,12 +40,12 @@ export class TaxesController {
   })
   @ApiResponse({
     status: 400,
-    description: "Bad Request - Tax with slug already exists or invalid value",
+    description: "Bad Request - Tax with title already exists or invalid value",
     schema: {
       example: {
         statusCode: 400,
         status: false,
-        message: "Tax with this slug already exists",
+        message: "Tax with this title already exists",  
         heading: "Tax",
         data: null,
   }}})
@@ -74,12 +74,12 @@ export class TaxesController {
   }}})
   @ApiResponse({
     status: 400,
-    description: "Bad Request - Tax with slug already exists or invalid value",
+    description: "Bad Request - Tax with title already exists or invalid value",
     schema: {
       example: {
         statusCode: 400,
         status: false,
-        message: "Tax with this slug already exists",
+        message: "Tax with this title already exists",  
         heading: "Tax",
         data: null,
   }}})
@@ -120,8 +120,9 @@ export class TaxesController {
   })
   @ApiQuery({ name: "page", required: false, type: Number, description: "Page number" })
   @ApiQuery({ name: "limit", required: false, type: Number, description: "Items per page" })
-  async getAll(@Query(ValidationPipe) paginationDto: PaginationDto) {
-    return this.taxesService.getAll(paginationDto);
+  @ApiQuery({ name: "search", required: false, type: String, description: "Optional search term" })
+  async getAll(@Query(ValidationPipe) query: TaxListQueryDto) {
+    return this.taxesService.getAll(query);
   }
 
   @Delete("delete")

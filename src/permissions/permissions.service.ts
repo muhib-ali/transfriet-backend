@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, Brackets } from "typeorm";
 import { Permission } from "../entities/permission.entity";
 import { Module } from "../entities/module.entity";
 import { CreatePermissionDto } from "./dto/create-permission.dto";
@@ -154,27 +154,33 @@ export class PermissionsService {
     );
   }
 
-  async getAll(
-    filterDto: PermissionFilterDto
-  ): Promise<PaginatedApiResponse<Permission>> {
-    const { page = 1, limit = 10, moduleId } = filterDto;
+  async getAll(filterDto: PermissionFilterDto): Promise<PaginatedApiResponse<Permission>> {
+    const { page = 1, limit = 10, moduleId, search } = filterDto;
     const skip = (page - 1) * limit;
 
-    // Build query conditions
-    const whereConditions: any = {};
+    const qb = this.permissionRepository.createQueryBuilder("permission")
+      .leftJoinAndSelect("permission.module", "module")
+      .orderBy("permission.created_at", "DESC")
+      .skip(skip)
+      .take(limit);
 
-    // Add module filter if provided
     if (moduleId) {
-      whereConditions.module_id = moduleId;
+      qb.andWhere("permission.module_id = :moduleId", { moduleId });
     }
 
-    const [permissions, total] = await this.permissionRepository.findAndCount({
-      where: whereConditions,
-      skip,
-      take: limit,
-      relations: ["module"],
-      order: { created_at: "DESC" },
-    });
+    if (search && search.trim() !== "") {
+      const term = `%${search.trim()}%`;
+      qb.andWhere(new Brackets((sub) => {
+        sub.where("permission.title ILIKE :search", { search: term })
+          .orWhere("permission.slug ILIKE :search", { search: term })
+          .orWhere("permission.description ILIKE :search", { search: term })
+          .orWhere("module.title ILIKE :search", { search: term })
+          .orWhere("module.slug ILIKE :search", { search: term })
+          .orWhere("module.description ILIKE :search", { search: term });
+      }));
+    }
+
+    const [permissions, total] = await qb.getManyAndCount();
 
     const message = moduleId
       ? "Permissions filtered by module retrieved successfully"

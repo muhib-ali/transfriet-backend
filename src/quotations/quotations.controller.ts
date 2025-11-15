@@ -11,6 +11,7 @@ import { UpdateQuotationDto } from "./dto/update-quotation.dto";
 import { DeleteQuotationDto } from "./dto/delete-quotation.dto";
 import { QuotationResponseDto, QuotationsListResponseDto } from "./dto/quotation-response.dto";
 import { PaginationDto } from "../common/dto/pagination.dto";
+import { QuotationListQueryDto } from "./dto/quotation-list-query.dto";
 
 @ApiTags("Quotations")
 @ApiBearerAuth("JWT-auth")
@@ -47,7 +48,8 @@ export class QuotationsController {
   @ApiResponse({ status: 200, type: QuotationsListResponseDto })
   @ApiQuery({ name: "page", required: false, type: Number })
   @ApiQuery({ name: "limit", required: false, type: Number })
-  async getAll(@Query(ValidationPipe) pagination: PaginationDto) {
+  @ApiQuery({ name: "search", required: false, type: String })
+  async getAll(@Query(ValidationPipe) pagination: QuotationListQueryDto) {
     return this.quotationsService.getAll(pagination);
   }
 

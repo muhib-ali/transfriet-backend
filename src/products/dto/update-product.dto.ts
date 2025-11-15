@@ -10,9 +10,6 @@ export class UpdateProductDto {
   @IsString() @IsNotEmpty() @MaxLength(255)
   title: string;
 
-  @ApiProperty({ example: "iphone-15-pro" })
-  @IsString() @IsNotEmpty() @MaxLength(255)
-  slug: string;
 
   @ApiProperty({ example: "Apple flagship phone", required: false })
   @IsString() @IsOptional()
@@ -22,7 +19,7 @@ export class UpdateProductDto {
   @IsNumber() @Min(0)
   price: number;
 
-  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", required: false })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000", required: false, description: "Job file ID" })
   @IsUUID() @IsOptional()
-  category_id?: string | null;
+  job_file_id?: string | null;
 }

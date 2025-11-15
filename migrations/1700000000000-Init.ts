@@ -181,15 +181,14 @@ export class Init1700000000000 implements MigrationInterface {
         "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         "title" character varying NOT NULL,
-        "slug" character varying NOT NULL,
         "value" numeric(5,2) NOT NULL,
         CONSTRAINT "CHK_taxes_value_range" CHECK ("value" >= 0 AND "value" <= 100),
-        CONSTRAINT "UQ_taxes_slug" UNIQUE ("slug")
+        CONSTRAINT "UQ_taxes_title" UNIQUE ("title")
       )
     `);
 
    await queryRunner.query(`
-        CREATE TABLE "categories" (
+        CREATE TABLE "job_files" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "is_active" boolean NOT NULL DEFAULT true,
   "created_by" character varying,
@@ -198,28 +197,27 @@ export class Init1700000000000 implements MigrationInterface {
   "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   "title" character varying NOT NULL,
   "description" character varying,
-  CONSTRAINT "UQ_categories_title" UNIQUE ("title")
+  CONSTRAINT "UQ_job_files_title" UNIQUE ("title")
 );
 `);
       await queryRunner.query(`
-        CREATE TABLE "products" (
-          "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-          "is_active" boolean NOT NULL DEFAULT true,
-          "created_by" character varying,
-          "updated_by" character varying,
-          "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-          "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-          "title" character varying NOT NULL,
-          "slug" character varying NOT NULL,
-          "description" character varying,
-          "price" numeric(10,2) NOT NULL,
-          "category_id" uuid,
-          CONSTRAINT "UQ_products_slug" UNIQUE ("slug")
-        )
-      `);
+  CREATE TABLE "products" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "is_active" boolean NOT NULL DEFAULT true,
+    "created_by" character varying,
+    "updated_by" character varying,
+    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    "title" character varying NOT NULL,
+    "description" character varying,
+    "price" numeric(10,2) NOT NULL,
+    "job_file_id" uuid,
+    CONSTRAINT "UQ_products_title" UNIQUE ("title")
+  )
+`);
       await queryRunner.query(`ALTER TABLE "products"
-ADD CONSTRAINT "FK_products_category_id"
-FOREIGN KEY ("category_id") REFERENCES "categories"("id")
+ADD CONSTRAINT "FK_products_job_file_id"
+FOREIGN KEY ("job_file_id") REFERENCES "job_files"("id")
 ON DELETE SET NULL ON UPDATE NO ACTION;`)
 
          await queryRunner.query(`
@@ -265,7 +263,7 @@ ON DELETE SET NULL ON UPDATE NO ACTION;`)
     "valid_until" TIMESTAMP WITH TIME ZONE,
 
     "customer_id" uuid NOT NULL,
-    "category_id" uuid,
+    "job_file_id" uuid,
 
     "shipper_name" character varying,
     "consignee_name" character varying,
@@ -287,7 +285,7 @@ ON DELETE SET NULL ON UPDATE NO ACTION;`)
 
     CONSTRAINT "UQ_quotations_quote_number" UNIQUE ("quote_number"),
     CONSTRAINT "FK_quotations_customer_id" FOREIGN KEY ("customer_id") REFERENCES "clients"("id") ON DELETE RESTRICT ON UPDATE NO ACTION,
-    CONSTRAINT "FK_quotations_category_id" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION
+    CONSTRAINT "FK_quotations_job_file_id" FOREIGN KEY ("job_file_id") REFERENCES "job_files"("id") ON DELETE SET NULL ON UPDATE NO ACTION
   );
 `);
 
@@ -348,7 +346,7 @@ await queryRunner.query(`
 
     "quotation_id" uuid,
     "customer_id" uuid NOT NULL,
-    "category_id" uuid,
+    "job_file_id" uuid,
 
     "shipper_name" character varying,
     "consignee_name" character varying,
@@ -370,7 +368,7 @@ await queryRunner.query(`
     CONSTRAINT "UQ_invoices_invoice_number" UNIQUE ("invoice_number"),
     CONSTRAINT "FK_invoices_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE SET NULL ON UPDATE NO ACTION,
     CONSTRAINT "FK_invoices_customer_id"  FOREIGN KEY ("customer_id")  REFERENCES "clients"("id")     ON DELETE RESTRICT ON UPDATE NO ACTION,
-    CONSTRAINT "FK_invoices_category_id"  FOREIGN KEY ("category_id")  REFERENCES "categories"("id")  ON DELETE SET NULL ON UPDATE NO ACTION
+    CONSTRAINT "FK_invoices_job_file_id"  FOREIGN KEY ("job_file_id")  REFERENCES "job_files"("id")  ON DELETE SET NULL ON UPDATE NO ACTION
   );
 `);
 
@@ -465,9 +463,9 @@ await queryRunner.query(`
     await queryRunner.query(`DROP TABLE IF EXISTS "domains"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "taxes"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "clients"`);
-        await queryRunner.query(`ALTER TABLE "products" DROP CONSTRAINT IF EXISTS "FK_products_category_id";`)
+        await queryRunner.query(`ALTER TABLE "products" DROP CONSTRAINT IF EXISTS "FK_products_job_file_id";`)
     await queryRunner.query(`DROP TABLE IF EXISTS "products"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "categories"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "job_files"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "quotation_subcategories";`);
     await queryRunner.query(`DROP TABLE IF EXISTS "subcategories"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "quotation_items"`);

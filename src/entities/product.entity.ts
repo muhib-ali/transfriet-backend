@@ -1,18 +1,17 @@
 import { Entity, Column, Unique, ManyToOne, JoinColumn } from "typeorm";
 import { BaseAuditColumns } from "./base-audit-columns.entity";
-import { Category } from "./category.entity";
+import { JobFile } from "./job-file.entity";
 import { OneToMany } from "typeorm";
 import { QuotationItem } from "./quotation-item.entity";
 import { InvoiceItem } from "./invoice-item.entity";
 
 @Entity("products")
-@Unique(["slug"])
+@Unique(["title"])
 export class Product extends BaseAuditColumns {
   @Column({ type: "varchar" })
   title: string;
 
-  @Column({ type: "varchar" })
-  slug: string;
+ 
 
   @Column({ type: "varchar", nullable: true })
   description: string | null;
@@ -22,12 +21,12 @@ export class Product extends BaseAuditColumns {
 
   // FK column
   @Column({ type: "uuid", nullable: true })
-  category_id: string | null;
+  job_file_id: string | null;
 
   // 🔗 Relation: many products → one category
-  @ManyToOne(() => Category, { nullable: true, onDelete: "SET NULL" })
-  @JoinColumn({ name: "category_id" })
-  category?: Category | null;
+  @ManyToOne(() => JobFile, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "job_file_id" })
+  category?: JobFile | null;
 
    @OneToMany(() => QuotationItem, (qi) => qi.product)
   quotation_items: QuotationItem[];

@@ -7,10 +7,7 @@ export class CreateTaxDto {
   @IsNotEmpty()
   title: string;
 
-  @ApiProperty({ description: "Unique slug (identifier)", example: "vat" })
-  @IsString()
-  @IsNotEmpty()
-  slug: string;
+ 
 
   @ApiProperty({ description: "Tax percentage (0-100)", example: 17.0 })
   @IsNumber()

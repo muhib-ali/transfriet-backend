@@ -12,7 +12,7 @@ import {
   ProductsDropdownResponseDto,
   TaxesDropdownResponseDto,
   ClientsDropdownResponseDto,
-  CategoriesDropdownResponseDto,
+  JobFilesDropdownResponseDto,
   SubcategoriesDropdownResponseDto,
 } from "./dto/dropdown-response.dto";
 
@@ -68,11 +68,11 @@ export class DropdownsController {
     return this.dropdownsService.getAllClients();
   }
 
-  @Get("getAllCategories")
-  @ApiOperation({ summary: "Get all active categories for dropdown" })
-  @ApiResponse({ status: 200, type: CategoriesDropdownResponseDto })
-  async getAllCategories() {
-    return this.dropdownsService.getAllCategories();
+  @Get("getAllJobFiles")
+  @ApiOperation({ summary: "Get all active job files for dropdown" })
+  @ApiResponse({ status: 200, type: JobFilesDropdownResponseDto })
+  async getAllJobFiles() {
+    return this.dropdownsService.getAllJobFiles();
   }
 
   @Get("getAllSubcategories")

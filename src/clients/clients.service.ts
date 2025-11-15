@@ -5,7 +5,7 @@ import { Client } from "../entities/client.entity";
 import { CreateClientDto } from "./dto/create-client.dto";
 import { UpdateClientDto } from "./dto/update-client.dto";
 import { DeleteClientDto } from "./dto/delete-client.dto";
-import { PaginationDto } from "../common/dto/pagination.dto";
+import { ClientListQueryDto } from "./dto/client-list-query.dto";
 import { ResponseHelper } from "../common/helpers/response.helper";
 import { ApiResponse, PaginatedApiResponse } from "../common/interfaces/api-response.interface";
 
@@ -57,15 +57,26 @@ export class ClientsService {
     return ResponseHelper.success(client, "Client retrieved successfully", "Client", 200);
   }
 
-  async getAll(paginationDto: PaginationDto): Promise<PaginatedApiResponse<Client>> {
-    const { page = 1, limit = 10 } = paginationDto;
+  async getAll(query: ClientListQueryDto): Promise<PaginatedApiResponse<Client>> {
+    const { page = 1, limit = 10, search } = query;
     const skip = (page - 1) * limit;
 
-    const [items, total] = await this.repo.findAndCount({
-      skip,
-      take: limit,
-      order: { created_at: "DESC" },
-    });
+    const qb = this.repo
+      .createQueryBuilder("client")
+      .orderBy("client.created_at", "DESC")
+      .skip(skip)
+      .take(limit);
+
+    if (search && search.trim() !== "") {
+      const term = `%${search.trim()}%`;
+      qb.where("client.name ILIKE :search", { search: term })
+        .orWhere("client.email ILIKE :search", { search: term })
+        .orWhere("client.phone ILIKE :search", { search: term })
+        .orWhere("client.country ILIKE :search", { search: term })
+        .orWhere("client.address ILIKE :search", { search: term });
+    }
+
+    const [items, total] = await qb.getManyAndCount();
 
     return ResponseHelper.paginated(
       items, page, limit, total,

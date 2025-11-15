@@ -105,9 +105,9 @@ async function seed() {
     is_active: true,
   },  
   {
-    title: "Categories",
-    slug: "categories",
-    description: "Manage categories",
+    title: "JobFiles",
+    slug: "job_files",
+    description: "Manage jobfiles",
     is_active: true,
   },
    {
@@ -179,7 +179,7 @@ async function seed() {
         { slug: "getAllProducts", title: "Get All Products", description: "Get all products for dropdown" },
   { slug: "getAllTaxes", title: "Get All Taxes", description: "Get all taxes for dropdown" },
   { slug: "getAllClients", title: "Get All Clients", description: "Get all clients for dropdown" },
-  { slug: "getAllCategories", title: "Get All Categories", description: "Get all categories for dropdown" },
+  { slug: "getAllJobFiles", title: "Get All Job Files", description: "Get all job files for dropdown" },
   { slug: "getAllSubcategories", title: "Get All Subcategories", description: "Get all subcategories for dropdown" },
       { slug: "getAll", title: "Get All", description: "List all" },
       { slug: "delete", title: "Delete", description: "Delete" },
@@ -261,7 +261,7 @@ async function seed() {
       "getAllProducts",
       "getAllTaxes",
       "getAllClients",
-      "getAllCategories",
+      "getAllJobFiles",
       "getAllSubcategories",
     ]);
 

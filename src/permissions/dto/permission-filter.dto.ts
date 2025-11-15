@@ -1,4 +1,4 @@
-import { IsOptional, IsUUID, IsNumber, Min, Max } from "class-validator";
+import { IsOptional, IsUUID, IsNumber, Min, Max, IsString, MaxLength } from "class-validator";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
 
@@ -34,4 +34,10 @@ export class PermissionFilterDto {
   @IsOptional()
   @IsUUID()
   moduleId?: string;
+
+  @ApiPropertyOptional({ description: "Optional search term", example: "create" })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  search?: string;
 }

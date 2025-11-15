@@ -3,7 +3,6 @@ import { ApiProperty } from "@nestjs/swagger";
 export class ProductDto {
   @ApiProperty() id: string;
   @ApiProperty() title: string;
-  @ApiProperty() slug: string;
   @ApiProperty({ nullable: true }) description: string | null;
   @ApiProperty() price: number;
   @ApiProperty({ nullable: true }) category_id: string | null;
