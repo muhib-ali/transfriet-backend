@@ -4,14 +4,14 @@ import { Quotation } from "./quotation.entity";
 import { Invoice } from "./invoice.entity";
 
 
-@Entity("subcategories")
+@Entity("service_details")
 @Unique(["title"])
-export class Subcategory extends BaseAuditColumns {
+export class ServiceDetail extends BaseAuditColumns {
   @Column({ type: "varchar" })
   title: string;
 
-    @ManyToMany(() => Quotation, (q) => q.subcategories, { eager: false })
+    @ManyToMany(() => Quotation, (q) => q.service_details, { eager: false })
   quotations: Quotation[];
-    @ManyToMany(() => Invoice, (i) => i.subcategories, { eager: false })
+    @ManyToMany(() => Invoice, (i) => i.service_details, { eager: false })
   invoices: Invoice[];
 }

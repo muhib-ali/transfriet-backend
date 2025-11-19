@@ -4,7 +4,7 @@ import {
 } from "typeorm";
 import { Client } from "./client.entity";
 import { JobFile } from "./job-file.entity";
-import { Subcategory } from "./subcategory.entity";
+import { ServiceDetail } from "./service-detail.entity";  
 import { QuotationItem } from "./quotation-item.entity";
 
 @Entity("quotations")
@@ -43,14 +43,14 @@ export class Quotation {
   @JoinColumn({ name: "job_file_id" })
   category: JobFile | null;
 
-  // Many subcategories via join table
-  @ManyToMany(() => Subcategory, (s) => s.quotations, { cascade: false })
+  // Many service details via join table
+  @ManyToMany(() => ServiceDetail, (s) => s.quotations, { cascade: false })
   @JoinTable({
-    name: "quotation_subcategories",
+    name: "quotation_service_details",
     joinColumn: { name: "quotation_id", referencedColumnName: "id" },
-    inverseJoinColumn: { name: "subcategory_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "service_detail_id", referencedColumnName: "id" },
   })
-  subcategories: Subcategory[];
+  service_details: ServiceDetail[];
 
   @Column({ type: "varchar", nullable: true })
   shipper_name: string | null;

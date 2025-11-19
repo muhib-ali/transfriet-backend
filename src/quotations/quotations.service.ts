@@ -13,7 +13,7 @@ import { ResponseHelper } from "../common/helpers/response.helper";
 import { ApiResponse, PaginatedApiResponse } from "../common/interfaces/api-response.interface";
 import { Client } from "../entities/client.entity";
 import { JobFile } from "../entities/job-file.entity";
-import { Subcategory } from "../entities/subcategory.entity";
+import { ServiceDetail } from "../entities/service-detail.entity";
 import { Tax } from "../entities/tax.entity";
 import { QuoteCounter } from "../entities/quote-counter.entity";
 
@@ -23,7 +23,7 @@ export class QuotationsService {
     private readonly dataSource: DataSource,
     @InjectRepository(Quotation) private quotationRepo: Repository<Quotation>,
     @InjectRepository(QuotationItem) private itemRepo: Repository<QuotationItem>,
-    @InjectRepository(Subcategory) private subRepo: Repository<Subcategory>,
+    @InjectRepository(ServiceDetail) private subRepo: Repository<ServiceDetail>,
   ) {}
 
   private async nextQuoteNumber(qr: ReturnType<DataSource["createQueryRunner"]>): Promise<string> {
@@ -61,11 +61,11 @@ export class QuotationsService {
         if (!jobFile) throw new BadRequestException("Invalid job_file_id");
       }
 
-      let subcategories: Subcategory[] = [];
-      if (dto.subcategory_ids?.length) {
-        subcategories = await qr.manager.findBy(Subcategory, { id: In(dto.subcategory_ids) });
-        if (subcategories.length !== dto.subcategory_ids.length) {
-          throw new BadRequestException("One or more subcategory_ids are invalid");
+      let serviceDetails: ServiceDetail[] = [];
+      if (dto.service_detail_ids?.length) {
+        serviceDetails = await qr.manager.findBy(ServiceDetail, { id: In(dto.service_detail_ids) });
+        if (serviceDetails.length !== dto.service_detail_ids.length) {
+          throw new BadRequestException("One or more service_detail_ids are invalid");
         }
       }
 
@@ -93,7 +93,7 @@ export class QuotationsService {
         valid_until: dto.valid_until ? new Date(dto.valid_until) : null,
         customer,                 // relation object
         category: jobFile ?? null,
-        subcategories,            // many-to-many
+        service_details: serviceDetails,            // many-to-many
         shipper_name: dto.shipper_name ?? null,
         consignee_name: dto.consignee_name ?? null,
         pieces_or_containers: dto.pieces_or_containers ?? null,
@@ -131,7 +131,7 @@ export class QuotationsService {
 
       const withRels = await this.quotationRepo.findOne({
         where: { id: saved.id },
-        relations: ["customer", "category", "subcategories", "items"],
+        relations: ["customer", "category", "service_details", "items"],
       });
 
       return ResponseHelper.success(withRels!, "Quotation created successfully", "Quotation", 201);
@@ -146,7 +146,7 @@ export class QuotationsService {
   async update(dto: UpdateQuotationDto): Promise<ApiResponse<Quotation>> {
     const base = await this.quotationRepo.findOne({
       where: { id: dto.id },
-      relations: ["subcategories", "customer", "category"],
+      relations: ["service_details", "customer", "category"],
     });
     if (!base) throw new NotFoundException("Quotation not found");
 
@@ -171,12 +171,12 @@ export class QuotationsService {
         }
       }
 
-      if (dto.subcategory_ids) {
-        const subs = await qr.manager.findBy(Subcategory, { id: In(dto.subcategory_ids) });
-        if (subs.length !== dto.subcategory_ids.length) {
-          throw new BadRequestException("One or more subcategory_ids are invalid");
+      if (dto.service_detail_ids) {
+        const subs = await qr.manager.findBy(ServiceDetail, { id: In(dto.service_detail_ids) });
+        if (subs.length !== dto.service_detail_ids.length) {
+          throw new BadRequestException("One or more service_detail_ids are invalid");
         }
-        (base as any).subcategories = subs;
+        (base as any).service_details = subs;
       }
 
       // patch scalars
@@ -236,7 +236,7 @@ export class QuotationsService {
 
       const withRels = await this.quotationRepo.findOne({
         where: { id: saved.id },
-      relations: ["customer", "category", "subcategories", "items"],
+      relations: ["customer", "category", "service_details", "items"],
       });
 
       return ResponseHelper.success(withRels!, "Quotation updated successfully", "Quotation", 200);
@@ -251,7 +251,7 @@ export class QuotationsService {
   async getById(id: string): Promise<ApiResponse<Quotation & { items: QuotationItem[] }>> {
     const quotation = await this.quotationRepo.findOne({
       where: { id },
-      relations: ["customer", "category", "subcategories"],
+      relations: ["customer", "category", "service_details"],
     });
     if (!quotation) throw new NotFoundException("Quotation not found");
 
@@ -273,7 +273,7 @@ export class QuotationsService {
       .createQueryBuilder("q")
       .leftJoinAndSelect("q.customer", "customer")
       .leftJoinAndSelect("q.category", "job_file")
-      .leftJoinAndSelect("q.subcategories", "sub")
+      .leftJoinAndSelect("q.service_details", "sub")
       .orderBy("q.created_at", "DESC")
       .distinct(true)
       .skip(skip)

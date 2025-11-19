@@ -33,12 +33,12 @@ export class CreateInvoiceDto {
   @ApiPropertyOptional({ format: "uuid", description: "Linked Job File ID" })
   @IsOptional() @IsUUID() job_file_id?: string;
 
-  @ApiPropertyOptional({ type: [String], description: "Subcategory UUIDs" })
+  @ApiPropertyOptional({ type: [String], description: "Service Detail UUIDs" })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @IsUUID("4", { each: true })
-  subcategory_ids?: string[];
+  service_detail_ids?: string[];
 
   @ApiPropertyOptional({ type: String })
   @IsOptional() @IsString() shipper_name?: string;

@@ -35,12 +35,12 @@ export class UpdateInvoiceDto {
   @ApiPropertyOptional({ format: "uuid" })
   @IsOptional() @IsUUID() job_file_id?: string | null;
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({ type: [String], description: "Service Detail UUIDs" })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @IsUUID("4", { each: true })
-  subcategory_ids?: string[] | null;
+  service_detail_ids?: string[] | null;
 
   @ApiPropertyOptional({ type: String })
   @IsOptional() @IsString() shipper_name?: string | null;

@@ -20,13 +20,13 @@ export class UpdateQuotationDto {
   @ApiPropertyOptional() @IsOptional() @IsUUID() customer_id?: string;
   @ApiPropertyOptional() @IsOptional() @IsUUID() job_file_id?: string | null;
 
-  // ✅ multi
-  @ApiPropertyOptional({ type: [String] })
+  // ✅ multi service details
+  @ApiPropertyOptional({ type: [String], description: "Service Detail UUIDs" })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @IsUUID("4", { each: true })
-  subcategory_ids?: string[] | null;
+  service_detail_ids?: string[] | null;
 
   @ApiPropertyOptional() @IsOptional() @IsString() shipper_name?: string | null;
   @ApiPropertyOptional() @IsOptional() @IsString() consignee_name?: string | null;

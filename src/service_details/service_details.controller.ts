@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, ValidationPipe } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam, ApiQuery } from "@nestjs/swagger";
-import { SubcategoriesService } from "./subcategories.service";
-import { SubcategoryResponseDto, SubcategoriesListResponseDto } from "./dto/subcategory-response.dto";
+import { ServiceDetailsService } from "./service_details.service";
+import { ServiceDetailResponseDto, ServiceDetailsListResponseDto } from "./dto/service-detail-response.dto";
 import { PaginationDto } from "../common/dto/pagination.dto";
 
-@ApiTags("Subcategories")
+@ApiTags("Service Details")
 @ApiBearerAuth("JWT-auth")
-@Controller("subcategories")
-export class SubcategoriesController {
-  constructor(private subcategoriesService: SubcategoriesService) {}
+@Controller("service_details")
+export class ServiceDetailsController {
+  constructor(private subcategoriesService: ServiceDetailsService) {}
 
 //   @Post("create")
 //   @ApiOperation({ summary: "Create new subcategory" })
@@ -29,8 +29,8 @@ export class SubcategoriesController {
 //   }
 
   @Get("getById/:id")
-  @ApiOperation({ summary: "Get subcategory by ID" })
-  @ApiResponse({ status: 200, description: "Subcategory retrieved successfully", type: SubcategoryResponseDto })
+  @ApiOperation({ summary: "Get service detail by ID" })
+  @ApiResponse({ status: 200, description: "Service detail retrieved successfully", type: ServiceDetailResponseDto })
   @ApiResponse({ status: 404, description: "Subcategory not found" })
   @ApiParam({ name: "id", description: "Subcategory ID", type: "string" })
   async getById(@Param("id") id: string) {
@@ -38,8 +38,8 @@ export class SubcategoriesController {
   }
 
   @Get("getAll")
-  @ApiOperation({ summary: "Get all subcategories with pagination" })
-  @ApiResponse({ status: 200, description: "Subcategories retrieved successfully", type: SubcategoriesListResponseDto })
+  @ApiOperation({ summary: "Get all service details with pagination" })
+  @ApiResponse({ status: 200, description: "Service details retrieved successfully", type: ServiceDetailsListResponseDto })
   @ApiQuery({ name: "page", required: false, type: Number, description: "Page number" })
   @ApiQuery({ name: "limit", required: false, type: Number, description: "Items per page" })
   async getAll(@Query(ValidationPipe) paginationDto: PaginationDto) {

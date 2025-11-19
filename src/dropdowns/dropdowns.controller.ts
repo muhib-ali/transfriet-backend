@@ -13,7 +13,7 @@ import {
   TaxesDropdownResponseDto,
   ClientsDropdownResponseDto,
   JobFilesDropdownResponseDto,
-  SubcategoriesDropdownResponseDto,
+  ServiceDetailsDropdownResponseDto,
 } from "./dto/dropdown-response.dto";
 
 @ApiTags("Dropdowns")
@@ -75,10 +75,10 @@ export class DropdownsController {
     return this.dropdownsService.getAllJobFiles();
   }
 
-  @Get("getAllSubcategories")
-  @ApiOperation({ summary: "Get all active subcategories for dropdown" })
-  @ApiResponse({ status: 200, type: SubcategoriesDropdownResponseDto })
-  async getAllSubcategories() {
-    return this.dropdownsService.getAllSubcategories();
+  @Get("getAllServiceDetails")
+  @ApiOperation({ summary: "Get all active service details for dropdown" })
+  @ApiResponse({ status: 200, type: ServiceDetailsDropdownResponseDto })
+  async getAllServiceDetails() {
+    return this.dropdownsService.getAllServiceDetails();
   }
 }

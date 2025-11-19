@@ -240,7 +240,7 @@ ON DELETE SET NULL ON UPDATE NO ACTION;`)
     `);
 
     await queryRunner.query(`
-  CREATE TABLE "subcategories" (
+  CREATE TABLE "service_details" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "title" character varying NOT NULL UNIQUE,
     "is_active" boolean NOT NULL DEFAULT true,
@@ -290,12 +290,12 @@ ON DELETE SET NULL ON UPDATE NO ACTION;`)
 `);
 
 await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "quotation_subcategories" (
+  CREATE TABLE IF NOT EXISTS "quotation_service_details" (
     "quotation_id" uuid NOT NULL,
-    "subcategory_id" uuid NOT NULL,
-    PRIMARY KEY ("quotation_id","subcategory_id"),
-    CONSTRAINT "FK_qsub_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE CASCADE ON UPDATE NO ACTION,
-    CONSTRAINT "FK_qsub_subcategory_id" FOREIGN KEY ("subcategory_id") REFERENCES "subcategories"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+    "service_detail_id" uuid NOT NULL,
+    PRIMARY KEY ("quotation_id","service_detail_id"),
+    CONSTRAINT "FK_qsdet_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE CASCADE ON UPDATE NO ACTION,
+    CONSTRAINT "FK_qsdet_service_detail_id" FOREIGN KEY ("service_detail_id") REFERENCES "service_details"("id") ON DELETE CASCADE ON UPDATE NO ACTION
   );
 `);
   
@@ -372,14 +372,14 @@ await queryRunner.query(`
   );
 `);
 
-// invoices <> subcategories (M2M)
+// invoices <> service_details (M2M)
 await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "invoice_subcategories" (
+  CREATE TABLE IF NOT EXISTS "invoice_service_details" (
     "invoice_id" uuid NOT NULL,
-    "subcategory_id" uuid NOT NULL,
-    PRIMARY KEY ("invoice_id","subcategory_id"),
-    CONSTRAINT "FK_isub_invoice_id"     FOREIGN KEY ("invoice_id")    REFERENCES "invoices"("id")      ON DELETE CASCADE ON UPDATE NO ACTION,
-    CONSTRAINT "FK_isub_subcategory_id" FOREIGN KEY ("subcategory_id") REFERENCES "subcategories"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+    "service_detail_id" uuid NOT NULL,
+    PRIMARY KEY ("invoice_id","service_detail_id"),
+    CONSTRAINT "FK_isdet_invoice_id"      FOREIGN KEY ("invoice_id")       REFERENCES "invoices"("id")       ON DELETE CASCADE ON UPDATE NO ACTION,
+    CONSTRAINT "FK_isdet_service_detail_id" FOREIGN KEY ("service_detail_id") REFERENCES "service_details"("id") ON DELETE CASCADE ON UPDATE NO ACTION
   );
 `);
 
@@ -448,6 +448,9 @@ await queryRunner.query(`
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_oauth_tokens_userId"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_oauth_tokens_token"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "oauth_tokens"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "invoice_service_details"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "quotation_service_details"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "service_details"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "users"`);
     await queryRunner.query(
       `DROP INDEX IF EXISTS "IDX_role_permissions_role_id_permission_id"`

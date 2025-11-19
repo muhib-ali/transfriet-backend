@@ -27,7 +27,7 @@ import { TaxesModule } from "./tax/taxes.module";
 import { ClientsModule } from './clients/clients.modules';
 import { JobFilesModule } from "./job_files/job_files.module";
 import { ProductsModule } from "./products/products.module";
-import { SubcategoriesModule } from "./subcategories/subcategories.module";
+import { ServiceDetailsModule } from "./service_details/service_details.module";
 import { QuotationsModule } from "./quotations/quotations.module";
 import { InvoicesModule } from "./invoices/invoices.module";
 
@@ -117,7 +117,7 @@ import { InvoicesModule } from "./invoices/invoices.module";
     ClientsModule,
     JobFilesModule,
     ProductsModule,
-    SubcategoriesModule,
+    ServiceDetailsModule,
     QuotationsModule,
     InvoicesModule,
   ],

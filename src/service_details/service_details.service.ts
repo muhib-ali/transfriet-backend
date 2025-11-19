@@ -1,23 +1,23 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Subcategory } from "../entities/subcategory.entity";
+import { ServiceDetail } from "../entities/service-detail.entity";
 import { PaginationDto } from "../common/dto/pagination.dto";
 import { ResponseHelper } from "../common/helpers/response.helper";
 import { ApiResponse, PaginatedApiResponse } from "../common/interfaces/api-response.interface";
 
 @Injectable()
-export class SubcategoriesService {
-  constructor(@InjectRepository(Subcategory) private repo: Repository<Subcategory>) {}
+export class ServiceDetailsService {
+  constructor(@InjectRepository(ServiceDetail) private repo: Repository<ServiceDetail>) {}
 
 
-  async getById(id: string): Promise<ApiResponse<Subcategory>> {
+  async getById(id: string): Promise<ApiResponse<ServiceDetail>> {
     const entity = await this.repo.findOne({ where: { id } });
-    if (!entity) throw new NotFoundException("Subcategory not found");
-    return ResponseHelper.success(entity, "Subcategory retrieved successfully", "Subcategory", 200);
+    if (!entity) throw new NotFoundException("Service detail not found");
+    return ResponseHelper.success(entity, "Service detail retrieved successfully", "Service Detail", 200);
   }
 
-  async getAll(paginationDto: PaginationDto): Promise<PaginatedApiResponse<Subcategory>> {
+  async getAll(paginationDto: PaginationDto): Promise<PaginatedApiResponse<ServiceDetail>> {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
@@ -26,8 +26,8 @@ export class SubcategoriesService {
     });
 
     return ResponseHelper.paginated(
-      items, page, limit, total, "subcategories",
-      "Subcategories retrieved successfully", "Subcategory"
+      items, page, limit, total, "service_details",
+      "Service details retrieved successfully", "Service Detail"
     );
   }
 

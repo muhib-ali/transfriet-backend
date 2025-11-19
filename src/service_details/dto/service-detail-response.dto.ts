@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class SubcategoryDto {
+export class ServiceDetailDto {
   @ApiProperty() id: string;
   @ApiProperty() title: string;
 
@@ -11,23 +11,23 @@ export class SubcategoryDto {
   @ApiProperty() updated_at: Date;
 }
 
-export class SubcategoryResponseDto {
+export class ServiceDetailResponseDto {
   @ApiProperty({ example: 200 }) statusCode: number;
   @ApiProperty({ example: true }) status: boolean;
-  @ApiProperty({ example: "Subcategory retrieved successfully" }) message: string;
-  @ApiProperty({ example: "Subcategory" }) heading: string;
-  @ApiProperty({ type: SubcategoryDto }) data: SubcategoryDto;
+  @ApiProperty({ example: "Service detail retrieved successfully" }) message: string;
+  @ApiProperty({ example: "Service Detail" }) heading: string;
+  @ApiProperty({ type: ServiceDetailDto }) data: ServiceDetailDto;
 }
 
-export class SubcategoriesListResponseDto {
+export class ServiceDetailsListResponseDto {
   @ApiProperty({ example: 200 }) statusCode: number;
   @ApiProperty({ example: true }) status: boolean;
-  @ApiProperty({ example: "Subcategories retrieved successfully" }) message: string;
-  @ApiProperty({ example: "Subcategory" }) heading: string;
+  @ApiProperty({ example: "Service details retrieved successfully" }) message: string;
+  @ApiProperty({ example: "Service Detail" }) heading: string;
   @ApiProperty({
     type: "object",
     properties: {
-      subcategories: { type: "array", items: { $ref: "#/components/schemas/SubcategoryDto" } },
+      service_details: { type: "array", items: { $ref: "#/components/schemas/ServiceDetailDto" } },
       pagination: {
         type: "object",
         properties: {
@@ -44,7 +44,7 @@ export class SubcategoriesListResponseDto {
     },
   })
   data: {
-    subcategories: SubcategoryDto[];
+    service_details: ServiceDetailDto[];
     pagination: {
       page: number; limit: number; total: number; totalPages: number;
       hasNext: boolean; hasPrev: boolean; nextPage: number | null; prevPage: number | null;

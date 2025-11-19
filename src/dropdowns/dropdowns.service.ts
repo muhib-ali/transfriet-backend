@@ -9,7 +9,7 @@ import { Product } from "../entities/product.entity";
 import { Tax } from "../entities/tax.entity";
 import { Client } from "../entities/client.entity";
 import { JobFile } from "../entities/job-file.entity";
-import { Subcategory } from "../entities/subcategory.entity";
+import { ServiceDetail } from "../entities/service-detail.entity";
 
 @Injectable()
 export class DropdownsService {
@@ -26,8 +26,8 @@ export class DropdownsService {
     private clientRepository: Repository<Client>,
     @InjectRepository(JobFile) 
     private jobFileRepository: Repository<JobFile>,
-    @InjectRepository(Subcategory)
-    private subcategoryRepository: Repository<Subcategory>,
+    @InjectRepository(ServiceDetail)
+    private serviceDetailRepository: Repository<ServiceDetail>,
   ) {}
 
   async getAllRoles(): Promise<ApiResponse<any>> {
@@ -130,14 +130,14 @@ export class DropdownsService {
     return ResponseHelper.success({ jobFilesDropdown }, "Job files dropdown data retrieved successfully", "Dropdowns");
   }
 
-  async getAllSubcategories(): Promise<ApiResponse<any>> {
-    const rows = await this.subcategoryRepository.find({
+  async getAllServiceDetails(): Promise<ApiResponse<any>> {
+    const rows = await this.serviceDetailRepository.find({
       where: { is_active: true },
       select: ["id", "title"],
       order: { title: "ASC" },
     });
-    const subcategoriesDropdown = rows.map(s => ({ label: s.title, value: s.id }));
-    return ResponseHelper.success({ subcategoriesDropdown }, "Subcategories dropdown data retrieved successfully", "Dropdowns");
+    const serviceDetailsDropdown = rows.map(s => ({ label: s.title, value: s.id }));
+    return ResponseHelper.success({ serviceDetailsDropdown }, "Service details dropdown data retrieved successfully", "Dropdowns");
   }
 
 }

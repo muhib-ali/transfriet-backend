@@ -117,9 +117,9 @@ async function seed() {
     is_active: true,
   },
    {
-    title: "Subcategories",
-    slug: "subcategories",
-    description: "Manage subcategories",
+    title: "Service Details",
+    slug: "service_details",
+    description: "Manage service details",
     is_active: true,
    },
    {
@@ -180,7 +180,7 @@ async function seed() {
   { slug: "getAllTaxes", title: "Get All Taxes", description: "Get all taxes for dropdown" },
   { slug: "getAllClients", title: "Get All Clients", description: "Get all clients for dropdown" },
   { slug: "getAllJobFiles", title: "Get All Job Files", description: "Get all job files for dropdown" },
-  { slug: "getAllSubcategories", title: "Get All Subcategories", description: "Get all subcategories for dropdown" },
+  { slug: "getAllServiceDetails", title: "Get All Service Details", description: "Get all service details for dropdown" },
       { slug: "getAll", title: "Get All", description: "List all" },
       { slug: "delete", title: "Delete", description: "Delete" },
     ];
@@ -262,7 +262,7 @@ async function seed() {
       "getAllTaxes",
       "getAllClients",
       "getAllJobFiles",
-      "getAllSubcategories",
+      "getAllServiceDetails",
     ]);
 
     // Non-dropdowns modules should NOT get dropdown-only slugs

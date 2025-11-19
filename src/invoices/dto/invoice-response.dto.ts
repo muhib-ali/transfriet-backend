@@ -16,7 +16,7 @@ export class InvoiceDto {
   @ApiProperty({ nullable: true }) quotation_id: string | null;
   @ApiProperty() customer_id: string;
   @ApiProperty({ nullable: true }) category_id: string | null;
-  @ApiProperty({ nullable: true, isArray: true, type: String }) subcategory_ids?: string[] | null;
+  @ApiProperty({ nullable: true, isArray: true, type: String }) service_detail_ids?: string[] | null;
   @ApiProperty({ nullable: true }) shipper_name: string | null;
   @ApiProperty({ nullable: true }) consignee_name: string | null;
   @ApiProperty({ nullable: true }) pieces_or_containers: string | null;

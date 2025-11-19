@@ -59,9 +59,9 @@ export class JobFilesDropdownDataDto {
   jobFilesDropdown: DropdownItemDto[];
 }
 
-export class SubcategoriesDropdownDataDto {
-  @ApiProperty({ type: [DropdownItemDto], description: "Array of subcategories for dropdown" })
-  subcategoriesDropdown: DropdownItemDto[];
+export class ServiceDetailsDropdownDataDto {
+  @ApiProperty({ type: [DropdownItemDto], description: "Array of service details for dropdown" })
+  serviceDetailsDropdown: DropdownItemDto[];
 }
 
 
@@ -132,10 +132,10 @@ export class JobFilesDropdownResponseDto {
   @ApiProperty({ type: JobFilesDropdownDataDto }) data: JobFilesDropdownDataDto;
 }
 
-export class SubcategoriesDropdownResponseDto {
+export class ServiceDetailsDropdownResponseDto {
   @ApiProperty({ example: 200 }) statusCode: number;
   @ApiProperty({ example: true }) status: boolean;
-  @ApiProperty({ example: "Subcategories dropdown data retrieved successfully" }) message: string;
+  @ApiProperty({ example: "Service details dropdown data retrieved successfully" }) message: string;
   @ApiProperty({ example: "Dropdowns" }) heading: string;
-  @ApiProperty({ type: SubcategoriesDropdownDataDto }) data: SubcategoriesDropdownDataDto;
+  @ApiProperty({ type: ServiceDetailsDropdownDataDto }) data: ServiceDetailsDropdownDataDto;
 }

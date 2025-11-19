@@ -4,6 +4,7 @@ import { JobFile } from "./job-file.entity";
 import { OneToMany } from "typeorm";
 import { QuotationItem } from "./quotation-item.entity";
 import { InvoiceItem } from "./invoice-item.entity";
+// import { ProductTranslation } from "./product-translation.entity";
 
 @Entity("products")
 @Unique(["title"])
@@ -23,7 +24,7 @@ export class Product extends BaseAuditColumns {
   @Column({ type: "uuid", nullable: true })
   job_file_id: string | null;
 
-  // 🔗 Relation: many products → one category
+  // 🔗 Relation: many products → onea category
   @ManyToOne(() => JobFile, { nullable: true, onDelete: "SET NULL" })
   @JoinColumn({ name: "job_file_id" })
   category?: JobFile | null;

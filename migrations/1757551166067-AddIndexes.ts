@@ -80,7 +80,7 @@ export class AddIndexes1757551166067 implements MigrationInterface {
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_quotations_customer_id" ON "quotations" ("customer_id")';
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_quotations_created_at" ON "quotations" ("created_at")';
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_quotations_quote_number" ON "quotations" ("quote_number")';
-          -- NOTE: removed old single-FK subcategory index; now using junction table indexes below
+          -- NOTE: using junction table indexes for service details below
         END IF;
       END
       $$;
@@ -98,15 +98,15 @@ export class AddIndexes1757551166067 implements MigrationInterface {
       $$;
     `);
 
-    //Junction table indexes for many-to-many subcategories
+    // Junction table indexes for many-to-many service details
     await queryRunner.query(`
       DO $$
       BEGIN
-        IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'quotation_subcategories' AND relkind = 'r') THEN
-          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_qsub_quotation_id" ON "quotation_subcategories" ("quotation_id")';
-          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_qsub_subcategory_id" ON "quotation_subcategories" ("subcategory_id")';
-          -- helpful reverse lookup (subcategory -> quotations)
-          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_qsub_subcategory_quotation" ON "quotation_subcategories" ("subcategory_id","quotation_id")';
+        IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'quotation_service_details' AND relkind = 'r') THEN
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_qsdet_quotation_id" ON "quotation_service_details" ("quotation_id")';
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_qsdet_service_detail_id" ON "quotation_service_details" ("service_detail_id")';
+          -- helpful reverse lookup (service_detail -> quotations)
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_qsdet_service_detail_quotation" ON "quotation_service_details" ("service_detail_id","quotation_id")';
         END IF;
       END
       $$;
@@ -142,14 +142,14 @@ await queryRunner.query(`
   $$;
 `);
 
-// Invoice <> Subcategories junction (M2M)
+// Invoice <> Service Details junction (M2M)
 await queryRunner.query(`
   DO $$
   BEGIN
-    IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'invoice_subcategories' AND relkind = 'r') THEN
-      EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_isub_invoice_id"      ON "invoice_subcategories" ("invoice_id")';
-      EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_isub_subcategory_id"  ON "invoice_subcategories" ("subcategory_id")';
-      EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_isub_subcategory_invoice" ON "invoice_subcategories" ("subcategory_id","invoice_id")';
+    IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'invoice_service_details' AND relkind = 'r') THEN
+      EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_isdet_invoice_id"      ON "invoice_service_details" ("invoice_id")';
+      EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_isdet_service_detail_id"  ON "invoice_service_details" ("service_detail_id")';
+      EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_isdet_service_detail_invoice" ON "invoice_service_details" ("service_detail_id","invoice_id")';
     END IF;
   END
   $$;
@@ -167,9 +167,9 @@ await queryRunner.query(`
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_role_permissions_role_module"`);
 
     // Junction table indexes (new)
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_qsub_subcategory_quotation"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_qsub_subcategory_id"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_qsub_quotation_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_qsdet_service_detail_quotation"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_qsdet_service_detail_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_qsdet_quotation_id"`);
 
     // Quotation/item indexes
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_qitems_tax_id"`);
@@ -180,10 +180,10 @@ await queryRunner.query(`
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_quotations_customer_id"`);
     // (No drop for old subcategory FK index—no longer created)
 
-    // invoice_subcategories
-await queryRunner.query(`DROP INDEX IF EXISTS "IDX_isub_subcategory_invoice"`);
-await queryRunner.query(`DROP INDEX IF EXISTS "IDX_isub_subcategory_id"`);
-await queryRunner.query(`DROP INDEX IF EXISTS "IDX_isub_invoice_id"`);
+// invoice_service_details
+await queryRunner.query(`DROP INDEX IF EXISTS "IDX_isdet_service_detail_invoice"`);
+await queryRunner.query(`DROP INDEX IF EXISTS "IDX_isdet_service_detail_id"`);
+await queryRunner.query(`DROP INDEX IF EXISTS "IDX_isdet_invoice_id"`);
 
 // invoice_items
 await queryRunner.query(`DROP INDEX IF EXISTS "IDX_iitems_tax_id"`);

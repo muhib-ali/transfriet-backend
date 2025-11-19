@@ -21,13 +21,13 @@ export class CreateQuotationDto {
   @ApiPropertyOptional()
   @IsOptional() @IsUUID() job_file_id?: string;
 
-  // ✅ multiple subcategories
-  @ApiPropertyOptional({ type: [String] })
+  // ✅ multiple service details
+  @ApiPropertyOptional({ type: [String], description: "Service Detail UUIDs" })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @IsUUID("4", { each: true })
-  subcategory_ids?: string[];
+  service_detail_ids?: string[];
 
   @ApiPropertyOptional() @IsOptional() @IsString() shipper_name?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() consignee_name?: string;

@@ -13,7 +13,7 @@ import { ResponseHelper } from "../common/helpers/response.helper";
 import { ApiResponse, PaginatedApiResponse } from "../common/interfaces/api-response.interface";
 import { Client } from "../entities/client.entity";
 import { JobFile } from "../entities/job-file.entity";
-import { Subcategory } from "../entities/subcategory.entity";
+import { ServiceDetail } from "../entities/service-detail.entity";
 import { Tax } from "../entities/tax.entity";
 import { InvoiceCounter } from "../entities/invoice-counter.entity";
 import { Quotation } from "../entities/quotation.entity";
@@ -25,7 +25,7 @@ export class InvoicesService {
     private readonly dataSource: DataSource,
     @InjectRepository(Invoice) private invoiceRepo: Repository<Invoice>,
     @InjectRepository(InvoiceItem) private itemRepo: Repository<InvoiceItem>,
-    @InjectRepository(Subcategory) private subRepo: Repository<Subcategory>,
+    @InjectRepository(ServiceDetail) private subRepo: Repository<ServiceDetail>,
     @InjectRepository(Quotation) private quotationRepo: Repository<Quotation>,
     @InjectRepository(QuotationItem) private quotationItemRepo: Repository<QuotationItem>,
   ) {}
@@ -84,17 +84,17 @@ export class InvoicesService {
       if (!jobFile) throw new BadRequestException("Invalid job_file_id");
     }
 
-    let subcategories: Subcategory[] = [];
-    if (dto.subcategory_ids?.length) {
-      subcategories = await qr.manager.findBy(Subcategory, { id: In(dto.subcategory_ids) });
-      if (subcategories.length !== dto.subcategory_ids.length) {
-        throw new BadRequestException("One or more subcategory_ids are invalid");
+    let serviceDetails: ServiceDetail[] = [];
+    if (dto.service_detail_ids?.length) {
+      serviceDetails = await qr.manager.findBy(ServiceDetail, { id: In(dto.service_detail_ids) });
+      if (serviceDetails.length !== dto.service_detail_ids.length) {
+        throw new BadRequestException("One or more service_detail_ids are invalid");
       }
     } else if (quotation) {
-      // (optional) prefill subcategories from quotation if not provided
-      subcategories = await qr.manager
-        .createQueryBuilder(Subcategory, "s")
-        .innerJoin("quotation_subcategories", "qs", "qs.subcategory_id = s.id")
+      // (optional) prefill service details from quotation if not provided
+      serviceDetails = await qr.manager
+        .createQueryBuilder(ServiceDetail, "s")
+        .innerJoin("quotation_service_details", "qs", "qs.service_detail_id = s.id")
         .where("qs.quotation_id = :qid", { qid: quotation.id })
         .getMany();
     }
@@ -136,7 +136,7 @@ export class InvoicesService {
       quotation: quotation ?? null,
       customer,
       category: jobFile ?? null,
-      subcategories,
+      service_details: serviceDetails,
       shipper_name: dto.shipper_name ?? null,
       consignee_name: dto.consignee_name ?? null,
       pieces_or_containers: dto.pieces_or_containers ?? null,
@@ -179,7 +179,7 @@ export class InvoicesService {
 
     const withRels = await this.invoiceRepo.findOne({
       where: { id: saved.id },
-      relations: ["quotation", "customer", "category", "subcategories", "items"],
+      relations: ["quotation", "customer", "category", "service_details", "items"],
     });
 
     return ResponseHelper.success(withRels!, "Invoice created successfully", "Invoice", 201);
@@ -195,7 +195,7 @@ export class InvoicesService {
   async update(dto: UpdateInvoiceDto): Promise<ApiResponse<Invoice>> {
     const base = await this.invoiceRepo.findOne({
       where: { id: dto.id },
-      relations: ["quotation", "subcategories", "customer", "category"],
+      relations: ["quotation", "service_details", "customer", "category"],
     });
     if (!base) throw new NotFoundException("Invoice not found");
 
@@ -228,12 +228,12 @@ export class InvoicesService {
         }
       }
 
-      if (dto.subcategory_ids) {
-        const subs = await qr.manager.findBy(Subcategory, { id: In(dto.subcategory_ids) });
-        if (subs.length !== dto.subcategory_ids.length) {
-          throw new BadRequestException("One or more subcategory_ids are invalid");
+      if (dto.service_detail_ids) {
+        const subs = await qr.manager.findBy(ServiceDetail, { id: In(dto.service_detail_ids) });
+        if (subs.length !== dto.service_detail_ids.length) {
+          throw new BadRequestException("One or more service_detail_ids are invalid");
         }
-        (base as any).subcategories = subs;
+        (base as any).service_details = subs;
       }
 
       const set = <K extends keyof Invoice>(k: K, v: any) => {
@@ -289,7 +289,7 @@ export class InvoicesService {
 
       const withRels = await this.invoiceRepo.findOne({
         where: { id: saved.id },
-      relations: ["quotation", "customer", "category", "subcategories", "items"],
+      relations: ["quotation", "customer", "category", "service_details", "items"],
       });
 
       return ResponseHelper.success(withRels!, "Invoice updated successfully", "Invoice", 200);
@@ -304,7 +304,7 @@ export class InvoicesService {
   async getById(id: string): Promise<ApiResponse<Invoice & { items: InvoiceItem[] }>> {
     const invoice = await this.invoiceRepo.findOne({
       where: { id },
-      relations: ["quotation", "customer", "category", "subcategories"],
+      relations: ["quotation", "customer", "category", "service_details"],
     });
     if (!invoice) throw new NotFoundException("Invoice not found");
 
@@ -327,7 +327,7 @@ export class InvoicesService {
       .leftJoinAndSelect("i.quotation", "quotation")
       .leftJoinAndSelect("i.customer", "customer")
       .leftJoinAndSelect("i.category", "job_file")
-      .leftJoinAndSelect("i.subcategories", "sub")
+      .leftJoinAndSelect("i.service_details", "sub")
       .orderBy("i.created_at", "DESC")
       .distinct(true)
       .skip(skip)
