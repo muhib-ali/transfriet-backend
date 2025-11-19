@@ -2,10 +2,17 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class DropdownItemDto {
   @ApiProperty({
-    description: "Display label for dropdown",
-    example: "Platform Admin",
+    description: "Display label for dropdown (e.g. English title)",
+    example: "Iron",
   })
   label: string;
+
+  @ApiProperty({
+    description: "Optional secondary label (e.g. Arabic title for multi-language dropdowns)",
+    example: "مكواة",
+    required: false,
+  })
+  labelAr?: string;
 
   @ApiProperty({
     description: "Value for dropdown item",
@@ -13,14 +20,12 @@ export class DropdownItemDto {
   })
   value: string;
 
-   @ApiProperty({
+  @ApiProperty({
     description: "Raw numeric price (only for products dropdown)",
     example: 489999.99,
     required: false,
   })
-  price?: number; // <--- added
-
- 
+  price?: number;
 }
 
 export class RolesDropdownDataDto {

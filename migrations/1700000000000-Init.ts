@@ -171,8 +171,8 @@ export class Init1700000000000 implements MigrationInterface {
                 CONSTRAINT "FK_users_role_id" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
             )
         `);
-    
-            await queryRunner.query(`
+
+    await queryRunner.query(`
       CREATE TABLE "taxes" (
         "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         "is_active" boolean NOT NULL DEFAULT true,
@@ -187,40 +187,58 @@ export class Init1700000000000 implements MigrationInterface {
       )
     `);
 
-   await queryRunner.query(`
+    await queryRunner.query(`
         CREATE TABLE "job_files" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "is_active" boolean NOT NULL DEFAULT true,
-  "created_by" character varying,
-  "updated_by" character varying,
-  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-  "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-  "title" character varying NOT NULL,
-  "description" character varying,
-  CONSTRAINT "UQ_job_files_title" UNIQUE ("title")
-);
-`);
-      await queryRunner.query(`
-  CREATE TABLE "products" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    "is_active" boolean NOT NULL DEFAULT true,
-    "created_by" character varying,
-    "updated_by" character varying,
-    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    "title" character varying NOT NULL,
-    "description" character varying,
-    "price" numeric(10,2) NOT NULL,
-    "job_file_id" uuid,
-    CONSTRAINT "UQ_products_title" UNIQUE ("title")
-  )
-`);
-      await queryRunner.query(`ALTER TABLE "products"
-ADD CONSTRAINT "FK_products_job_file_id"
-FOREIGN KEY ("job_file_id") REFERENCES "job_files"("id")
-ON DELETE SET NULL ON UPDATE NO ACTION;`)
+          "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          "is_active" boolean NOT NULL DEFAULT true,
+          "created_by" character varying,
+          "updated_by" character varying,
+          "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+          "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+          "title" character varying NOT NULL,
+          "description" character varying,
+          CONSTRAINT "UQ_job_files_title" UNIQUE ("title")
+        );
+    `);
 
-         await queryRunner.query(`
+    await queryRunner.query(`
+      CREATE TABLE "products" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "is_active" boolean NOT NULL DEFAULT true,
+        "created_by" character varying,
+        "updated_by" character varying,
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "price" numeric(10,2) NOT NULL,
+        "job_file_id" uuid
+      )
+    `);
+
+    await queryRunner.query(`
+      ALTER TABLE "products"
+      ADD CONSTRAINT "FK_products_job_file_id"
+      FOREIGN KEY ("job_file_id") REFERENCES "job_files"("id")
+      ON DELETE SET NULL ON UPDATE NO ACTION;
+    `);
+
+    await queryRunner.query(`
+      CREATE TABLE "product_translations" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "is_active" boolean NOT NULL DEFAULT true,
+        "created_by" character varying,
+        "updated_by" character varying,
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "language_code" character varying(5) NOT NULL,
+        "title" character varying NOT NULL,
+        "description" character varying,
+        "product_id" uuid NOT NULL,
+        CONSTRAINT "FK_product_translations_product_id" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION,
+        CONSTRAINT "UQ_product_translations_product_id_language_code" UNIQUE ("product_id", "language_code")
+      );
+    `);
+
+    await queryRunner.query(`
       CREATE TABLE "clients" (
         "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         "is_active" boolean NOT NULL DEFAULT true,
@@ -240,90 +258,89 @@ ON DELETE SET NULL ON UPDATE NO ACTION;`)
     `);
 
     await queryRunner.query(`
-  CREATE TABLE "service_details" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    "title" character varying NOT NULL UNIQUE,
-    "is_active" boolean NOT NULL DEFAULT true,
-    "created_by" character varying,
-    "updated_by" character varying,
-    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
-  );
-`);
- await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "quotations" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    "is_active" boolean NOT NULL DEFAULT true,
-    "created_by" character varying,
-    "updated_by" character varying,
-    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+      CREATE TABLE "service_details" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "title" character varying NOT NULL UNIQUE,
+        "is_active" boolean NOT NULL DEFAULT true,
+        "created_by" character varying,
+        "updated_by" character varying,
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+      );
+    `);
 
-    "quote_number" character varying NOT NULL,
-    "valid_until" TIMESTAMP WITH TIME ZONE,
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS "quotations" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "is_active" boolean NOT NULL DEFAULT true,
+        "created_by" character varying,
+        "updated_by" character varying,
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
 
-    "customer_id" uuid NOT NULL,
-    "job_file_id" uuid,
+        "quote_number" character varying NOT NULL,
+        "valid_until" TIMESTAMP WITH TIME ZONE,
 
-    "shipper_name" character varying,
-    "consignee_name" character varying,
-    "pieces_or_containers" integer,
-    "weight_volume" character varying,
-    "cargo_description" character varying,
-    "master_bill_no" character varying,
-    "loading_place" character varying,
-    "departure_date" TIMESTAMP WITH TIME ZONE,
-    "destination" character varying,
-    "arrival_date" TIMESTAMP WITH TIME ZONE,
-    "final_destination" character varying,
-    "notes" text,
+        "customer_id" uuid NOT NULL,
+        "job_file_id" uuid,
 
-    "subtotal" numeric(12,2) NOT NULL DEFAULT 0,
-    "tax_total" numeric(12,2) NOT NULL DEFAULT 0,
-    "grand_total" numeric(12,2) NOT NULL DEFAULT 0,
-    "isInvoiceCreated" boolean NOT NULL DEFAULT false,
+        "shipper_name" character varying,
+        "consignee_name" character varying,
+        "pieces_or_containers" integer,
+        "weight_volume" character varying,
+        "cargo_description" character varying,
+        "master_bill_no" character varying,
+        "loading_place" character varying,
+        "departure_date" TIMESTAMP WITH TIME ZONE,
+        "destination" character varying,
+        "arrival_date" TIMESTAMP WITH TIME ZONE,
+        "final_destination" character varying,
+        "notes" text,
 
-    CONSTRAINT "UQ_quotations_quote_number" UNIQUE ("quote_number"),
-    CONSTRAINT "FK_quotations_customer_id" FOREIGN KEY ("customer_id") REFERENCES "clients"("id") ON DELETE RESTRICT ON UPDATE NO ACTION,
-    CONSTRAINT "FK_quotations_job_file_id" FOREIGN KEY ("job_file_id") REFERENCES "job_files"("id") ON DELETE SET NULL ON UPDATE NO ACTION
-  );
-`);
+        "subtotal" numeric(12,2) NOT NULL DEFAULT 0,
+        "tax_total" numeric(12,2) NOT NULL DEFAULT 0,
+        "grand_total" numeric(12,2) NOT NULL DEFAULT 0,
+        "isInvoiceCreated" boolean NOT NULL DEFAULT false,
 
-await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "quotation_service_details" (
-    "quotation_id" uuid NOT NULL,
-    "service_detail_id" uuid NOT NULL,
-    PRIMARY KEY ("quotation_id","service_detail_id"),
-    CONSTRAINT "FK_qsdet_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE CASCADE ON UPDATE NO ACTION,
-    CONSTRAINT "FK_qsdet_service_detail_id" FOREIGN KEY ("service_detail_id") REFERENCES "service_details"("id") ON DELETE CASCADE ON UPDATE NO ACTION
-  );
-`);
-  
+        CONSTRAINT "UQ_quotations_quote_number" UNIQUE ("quote_number"),
+        CONSTRAINT "FK_quotations_customer_id" FOREIGN KEY ("customer_id") REFERENCES "clients"("id") ON DELETE RESTRICT ON UPDATE NO ACTION,
+        CONSTRAINT "FK_quotations_job_file_id" FOREIGN KEY ("job_file_id") REFERENCES "job_files"("id") ON DELETE SET NULL ON UPDATE NO ACTION
+      );
+    `);
 
-    // quotation_items
-   await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "quotation_items" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    "is_active" boolean NOT NULL DEFAULT true,
-    "created_by" character varying,
-    "updated_by" character varying,
-    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS "quotation_service_details" (
+        "quotation_id" uuid NOT NULL,
+        "service_detail_id" uuid NOT NULL,
+        PRIMARY KEY ("quotation_id","service_detail_id"),
+        CONSTRAINT "FK_qsdet_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE CASCADE ON UPDATE NO ACTION,
+        CONSTRAINT "FK_qsdet_service_detail_id" FOREIGN KEY ("service_detail_id") REFERENCES "service_details"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+      );
+    `);
 
-    "quotation_id" uuid NOT NULL,
-    "product_id" uuid NOT NULL,
-    "tax_id" uuid,
-    "quantity" integer NOT NULL DEFAULT 1,
-    "unit_price" numeric(12,2) NOT NULL DEFAULT 0,
-    "line_total" numeric(12,2) NOT NULL DEFAULT 0,
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS "quotation_items" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "is_active" boolean NOT NULL DEFAULT true,
+        "created_by" character varying,
+        "updated_by" character varying,
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
 
-    CONSTRAINT "FK_qitems_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE CASCADE ON UPDATE NO ACTION,
-    CONSTRAINT "FK_qitems_product_id" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE NO ACTION,
-    CONSTRAINT "FK_qitems_tax_id" FOREIGN KEY ("tax_id") REFERENCES "taxes"("id") ON DELETE SET NULL ON UPDATE NO ACTION
-  );
-`);
+        "quotation_id" uuid NOT NULL,
+        "product_id" uuid NOT NULL,
+        "tax_id" uuid,
+        "quantity" integer NOT NULL DEFAULT 1,
+        "unit_price" numeric(12,2) NOT NULL DEFAULT 0,
+        "line_total" numeric(12,2) NOT NULL DEFAULT 0,
 
-        await queryRunner.query(`
+        CONSTRAINT "FK_qitems_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE CASCADE ON UPDATE NO ACTION,
+        CONSTRAINT "FK_qitems_product_id" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE NO ACTION,
+        CONSTRAINT "FK_qitems_tax_id" FOREIGN KEY ("tax_id") REFERENCES "taxes"("id") ON DELETE SET NULL ON UPDATE NO ACTION
+      );
+    `);
+
+    await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "quote_counters" (
         "year" integer PRIMARY KEY,
         "last_serial" integer NOT NULL DEFAULT 0,
@@ -331,91 +348,86 @@ await queryRunner.query(`
       )
     `);
 
-    // invoices
-await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "invoices" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    "is_active" boolean NOT NULL DEFAULT true,
-    "created_by" character varying,
-    "updated_by" character varying,
-    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS "invoices" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "is_active" boolean NOT NULL DEFAULT true,
+        "created_by" character varying,
+        "updated_by" character varying,
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
 
-    "invoice_number" character varying NOT NULL,
-    "valid_until" TIMESTAMP WITH TIME ZONE,
+        "invoice_number" character varying NOT NULL,
+        "valid_until" TIMESTAMP WITH TIME ZONE,
 
-    "quotation_id" uuid,
-    "customer_id" uuid NOT NULL,
-    "job_file_id" uuid,
+        "quotation_id" uuid,
+        "customer_id" uuid NOT NULL,
+        "job_file_id" uuid,
 
-    "shipper_name" character varying,
-    "consignee_name" character varying,
-    "pieces_or_containers" integer,
-    "weight_volume" character varying,
-    "cargo_description" character varying,
-    "master_bill_no" character varying,
-    "loading_place" character varying,
-    "departure_date" TIMESTAMP WITH TIME ZONE,
-    "destination" character varying,
-    "arrival_date" TIMESTAMP WITH TIME ZONE,
-    "final_destination" character varying,
-    "notes" text,
+        "shipper_name" character varying,
+        "consignee_name" character varying,
+        "pieces_or_containers" integer,
+        "weight_volume" character varying,
+        "cargo_description" character varying,
+        "master_bill_no" character varying,
+        "loading_place" character varying,
+        "departure_date" TIMESTAMP WITH TIME ZONE,
+        "destination" character varying,
+        "arrival_date" TIMESTAMP WITH TIME ZONE,
+        "final_destination" character varying,
+        "notes" text,
 
-    "subtotal" numeric(12,2) NOT NULL DEFAULT 0,
-    "tax_total" numeric(12,2) NOT NULL DEFAULT 0,
-    "grand_total" numeric(12,2) NOT NULL DEFAULT 0,
+        "subtotal" numeric(12,2) NOT NULL DEFAULT 0,
+        "tax_total" numeric(12,2) NOT NULL DEFAULT 0,
+        "grand_total" numeric(12,2) NOT NULL DEFAULT 0,
 
-    CONSTRAINT "UQ_invoices_invoice_number" UNIQUE ("invoice_number"),
-    CONSTRAINT "FK_invoices_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE SET NULL ON UPDATE NO ACTION,
-    CONSTRAINT "FK_invoices_customer_id"  FOREIGN KEY ("customer_id")  REFERENCES "clients"("id")     ON DELETE RESTRICT ON UPDATE NO ACTION,
-    CONSTRAINT "FK_invoices_job_file_id"  FOREIGN KEY ("job_file_id")  REFERENCES "job_files"("id")  ON DELETE SET NULL ON UPDATE NO ACTION
-  );
-`);
+        CONSTRAINT "UQ_invoices_invoice_number" UNIQUE ("invoice_number"),
+        CONSTRAINT "FK_invoices_quotation_id" FOREIGN KEY ("quotation_id") REFERENCES "quotations"("id") ON DELETE SET NULL ON UPDATE NO ACTION,
+        CONSTRAINT "FK_invoices_customer_id"  FOREIGN KEY ("customer_id")  REFERENCES "clients"("id")     ON DELETE RESTRICT ON UPDATE NO ACTION,
+        CONSTRAINT "FK_invoices_job_file_id"  FOREIGN KEY ("job_file_id")  REFERENCES "job_files"("id")  ON DELETE SET NULL ON UPDATE NO ACTION
+      );
+    `);
 
-// invoices <> service_details (M2M)
-await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "invoice_service_details" (
-    "invoice_id" uuid NOT NULL,
-    "service_detail_id" uuid NOT NULL,
-    PRIMARY KEY ("invoice_id","service_detail_id"),
-    CONSTRAINT "FK_isdet_invoice_id"      FOREIGN KEY ("invoice_id")       REFERENCES "invoices"("id")       ON DELETE CASCADE ON UPDATE NO ACTION,
-    CONSTRAINT "FK_isdet_service_detail_id" FOREIGN KEY ("service_detail_id") REFERENCES "service_details"("id") ON DELETE CASCADE ON UPDATE NO ACTION
-  );
-`);
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS "invoice_service_details" (
+        "invoice_id" uuid NOT NULL,
+        "service_detail_id" uuid NOT NULL,
+        PRIMARY KEY ("invoice_id","service_detail_id"),
+        CONSTRAINT "FK_isdet_invoice_id"        FOREIGN KEY ("invoice_id")       REFERENCES "invoices"("id")         ON DELETE CASCADE ON UPDATE NO ACTION,
+        CONSTRAINT "FK_isdet_service_detail_id" FOREIGN KEY ("service_detail_id") REFERENCES "service_details"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+      );
+    `);
 
-// invoice_items
-await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "invoice_items" (
-    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    "is_active" boolean NOT NULL DEFAULT true,
-    "created_by" character varying,
-    "updated_by" character varying,
-    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS "invoice_items" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "is_active" boolean NOT NULL DEFAULT true,
+        "created_by" character varying,
+        "updated_by" character varying,
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
 
-    "invoice_id" uuid NOT NULL,
-    "product_id" uuid NOT NULL,
-    "tax_id" uuid,
-    "quantity" integer NOT NULL DEFAULT 1,
-    "unit_price" numeric(12,2) NOT NULL DEFAULT 0,
-    "line_total" numeric(12,2) NOT NULL DEFAULT 0,
+        "invoice_id" uuid NOT NULL,
+        "product_id" uuid NOT NULL,
+        "tax_id" uuid,
+        "quantity" integer NOT NULL DEFAULT 1,
+        "unit_price" numeric(12,2) NOT NULL DEFAULT 0,
+        "line_total" numeric(12,2) NOT NULL DEFAULT 0,
 
-    CONSTRAINT "FK_iitems_invoice_id"  FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id")  ON DELETE CASCADE  ON UPDATE NO ACTION,
-    CONSTRAINT "FK_iitems_product_id"  FOREIGN KEY ("product_id") REFERENCES "products"("id")  ON DELETE RESTRICT ON UPDATE NO ACTION,
-    CONSTRAINT "FK_iitems_tax_id"      FOREIGN KEY ("tax_id")     REFERENCES "taxes"("id")     ON DELETE SET NULL  ON UPDATE NO ACTION
-  );
-`);
+        CONSTRAINT "FK_iitems_invoice_id"  FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id")  ON DELETE CASCADE  ON UPDATE NO ACTION,
+        CONSTRAINT "FK_iitems_product_id"  FOREIGN KEY ("product_id") REFERENCES "products"("id")  ON DELETE RESTRICT ON UPDATE NO ACTION,
+        CONSTRAINT "FK_iitems_tax_id"      FOREIGN KEY ("tax_id")     REFERENCES "taxes"("id")     ON DELETE SET NULL  ON UPDATE NO ACTION
+      );
+    `);
 
-// invoice_counters (for INV-YYYY-XXX)
-await queryRunner.query(`
-  CREATE TABLE IF NOT EXISTS "invoice_counters" (
-    "year" integer PRIMARY KEY,
-    "last_serial" integer NOT NULL DEFAULT 0,
-    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
-  );
-`);
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS "invoice_counters" (
+        "year" integer PRIMARY KEY,
+        "last_serial" integer NOT NULL DEFAULT 0,
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+      );
+    `);
 
-  
     await queryRunner.query(`
             CREATE TABLE "oauth_tokens" (
                 "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -433,7 +445,6 @@ await queryRunner.query(`
                 CONSTRAINT "FK_oauth_tokens_userId" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
             )
         `);
-              
 
     await queryRunner.query(`
             CREATE INDEX "IDX_oauth_tokens_token" ON "oauth_tokens" ("token")
@@ -448,9 +459,11 @@ await queryRunner.query(`
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_oauth_tokens_userId"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_oauth_tokens_token"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "oauth_tokens"`);
+
     await queryRunner.query(`DROP TABLE IF EXISTS "invoice_service_details"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "quotation_service_details"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "service_details"`);
+
     await queryRunner.query(`DROP TABLE IF EXISTS "users"`);
     await queryRunner.query(
       `DROP INDEX IF EXISTS "IDX_role_permissions_role_id_permission_id"`
@@ -466,19 +479,25 @@ await queryRunner.query(`
     await queryRunner.query(`DROP TABLE IF EXISTS "domains"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "taxes"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "clients"`);
-        await queryRunner.query(`ALTER TABLE "products" DROP CONSTRAINT IF EXISTS "FK_products_job_file_id";`)
+
+    await queryRunner.query(
+      `ALTER TABLE "products" DROP CONSTRAINT IF EXISTS "FK_products_job_file_id";`
+    );
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "product_translations"`
+    );
     await queryRunner.query(`DROP TABLE IF EXISTS "products"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "job_files"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "quotation_subcategories";`);
+
+    await queryRunner.query(`DROP TABLE IF EXISTS "quotation_subcategories"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "subcategories"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "quotation_items"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "quotations"`);
-       await queryRunner.query(`DROP TABLE IF EXISTS "quote_counters"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "quote_counters"`);
 
-       await queryRunner.query(`DROP TABLE IF EXISTS "invoice_items"`);
-await queryRunner.query(`DROP TABLE IF EXISTS "invoice_subcategories"`);
-await queryRunner.query(`DROP TABLE IF EXISTS "invoices"`);
-await queryRunner.query(`DROP TABLE IF EXISTS "invoice_counters"`);
-
+    await queryRunner.query(`DROP TABLE IF EXISTS "invoice_items"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "invoice_subcategories"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "invoices"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "invoice_counters"`);
   }
 }

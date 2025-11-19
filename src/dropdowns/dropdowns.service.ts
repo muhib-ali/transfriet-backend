@@ -68,35 +68,34 @@ export class DropdownsService {
     );
   }
 
-   async getAllProducts(): Promise<ApiResponse<any>> {
+     async getAllProducts(): Promise<ApiResponse<any>> {
     const rows = await this.productRepository.find({
       where: { is_active: true },
-      select: ["id", "title", "price"], // ensure price is selected
-      order: { title: "ASC" },
+      relations: ["translations"],
+      order: { created_at: "DESC" }, // ya agar chaho to koi aur order use kar sakte ho
     });
 
-    // Currency formatter (PKR). Zarurat par "en-US"/USD use kar sakte ho.
-    const fmt = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 2,
-    });
+    const productsDropdown = rows.map((p) => {
+      const en = p.translations?.find((t) => t.language_code === "en");
+      const ar = p.translations?.find((t) => t.language_code === "ar");
 
-    const productsDropdown = rows.map(p => {
-      const priceNumber = Number(p.price); // numeric(12,2) aayega to string bhi ho sakta; normalize
+      const priceNumber = Number(p.price);
+
       return {
-        label: `${p.title}`, // e.g., "iPhone — ₨489,999.99"
+        label: en?.title ?? ar?.title ?? "",      // default label, mostly English
+        labelAr: ar?.title ?? undefined,          // optional Arabic label
         value: p.id,
-        price: priceNumber, // raw number for FE logic/sorting
+        price: priceNumber,                       // raw number for FE
       };
     });
 
     return ResponseHelper.success(
       { productsDropdown },
       "Products dropdown data retrieved successfully",
-      "Dropdowns"
+      "Dropdowns",
     );
   }
+
   
 
   async getAllTaxes(): Promise<ApiResponse<any>> {

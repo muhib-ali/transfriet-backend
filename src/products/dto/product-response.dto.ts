@@ -1,18 +1,51 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class ProductDto {
-  @ApiProperty() id: string;
-  @ApiProperty() title: string;
-  @ApiProperty({ nullable: true }) description: string | null;
-  @ApiProperty() price: number;
-  @ApiProperty({ nullable: true }) category_id: string | null;
+class ProductLanguageTranslationDto {
+  @ApiProperty()
+  title: string;
 
-  @ApiProperty() is_active: boolean;
-  @ApiProperty({ nullable: true }) created_by: string | null;
-  @ApiProperty({ nullable: true }) updated_by: string | null;
-  @ApiProperty() created_at: Date;
-  @ApiProperty() updated_at: Date;
+  @ApiProperty({ nullable: true })
+  description: string | null;
 }
+
+export class ProductDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  price: number;
+
+  @ApiProperty({ nullable: true })
+  category_id: string | null;
+
+  @ApiProperty({
+    description:
+      "Translations by language code, e.g. { en: { title, description }, ar: { title, description } }",
+    additionalProperties: { $ref: "#/components/schemas/ProductLanguageTranslationDto" },
+  })
+  translations: {
+    [lang: string]: {
+      title: string;
+      description: string | null;
+    };
+  };
+
+  @ApiProperty()
+  is_active: boolean;
+
+  @ApiProperty({ nullable: true })
+  created_by: string | null;
+
+  @ApiProperty({ nullable: true })
+  updated_by: string | null;
+
+  @ApiProperty()
+  created_at: Date;
+
+  @ApiProperty()
+  updated_at: Date;
+}
+
 
 export class ProductResponseDto {
   @ApiProperty({ example: 200 }) statusCode: number;
