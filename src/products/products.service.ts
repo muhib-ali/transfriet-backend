@@ -44,7 +44,6 @@ export class ProductsService {
     return {
       id: product.id,
       price: product.price,
-      category_id: product.job_file_id ?? null,
       translations,
       is_active: product.is_active,
       created_by: product.created_by,
@@ -57,7 +56,6 @@ export class ProductsService {
   async create(dto: CreateProductDto): Promise<ApiResponse<ProductDto>> {
     const product = this.repo.create({
       price: dto.price,
-      job_file_id: dto.job_file_id ?? null,
     });
 
     const savedProduct = await this.repo.save(product);
@@ -75,7 +73,7 @@ export class ProductsService {
 
     const withRelations = await this.repo.findOne({
       where: { id: savedProduct.id },
-      relations: ["translations", "category"],
+      relations: ["translations"],
     });
 
     const data = this.mapProductToDto(withRelations!);
@@ -99,9 +97,7 @@ export class ProductsService {
       current.price = dto.price;
     }
 
-    if (dto.job_file_id !== undefined) {
-      current.job_file_id = dto.job_file_id;
-    }
+    // job_file_id removed
 
     await this.repo.save(current);
 
@@ -122,7 +118,7 @@ export class ProductsService {
 
     const updated = await this.repo.findOne({
       where: { id: dto.id },
-      relations: ["translations", "category"],
+      relations: ["translations"],
     });
 
     const data = this.mapProductToDto(updated!);
@@ -160,7 +156,6 @@ export class ProductsService {
 
     const qb = this.repo
       .createQueryBuilder("product")
-      .leftJoinAndSelect("product.category", "job_file")
       .leftJoinAndSelect("product.translations", "translation")
       .orderBy("product.created_at", "DESC")
       .skip(skip)
@@ -173,10 +168,7 @@ export class ProductsService {
           sub
             .where("translation.title ILIKE :search", { search: term })
             .orWhere("translation.description ILIKE :search", { search: term })
-            .orWhere("job_file.title ILIKE :search", { search: term })
-            .orWhere("job_file.description ILIKE :search", {
-              search: term,
-            });
+            // removed job_file filters
         }),
       );
     }

@@ -7,7 +7,6 @@ import {
   OneToMany,
 } from "typeorm";
 import { BaseAuditColumns } from "./base-audit-columns.entity";
-import { JobFile } from "./job-file.entity";
 import { QuotationItem } from "./quotation-item.entity";
 import { InvoiceItem } from "./invoice-item.entity";
 import { ProductTranslation } from "./product-translation.entity";
@@ -17,12 +16,7 @@ export class Product extends BaseAuditColumns {
   @Column({ type: "numeric", precision: 10, scale: 2 })
   price: number;
 
-  @Column({ type: "uuid", nullable: true })
-  job_file_id: string | null;
-
-  @ManyToOne(() => JobFile, { nullable: true, onDelete: "SET NULL" })
-  @JoinColumn({ name: "job_file_id" })
-  category?: JobFile | null;
+  // Removed job_file_id and JobFile relation
 
   @OneToMany(() => QuotationItem, (qi) => qi.product)
   quotation_items: QuotationItem[];

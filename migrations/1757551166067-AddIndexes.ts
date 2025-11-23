@@ -61,16 +61,7 @@ export class AddIndexes1757551166067 implements MigrationInterface {
       $$;
     `);
 
-    //-- products (no title column now, only job_file_id)
-    await queryRunner.query(`
-      DO $$
-      BEGIN
-        IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'products' AND relkind = 'r') THEN
-          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_products_job_file_id" ON "products" ("job_file_id")';
-        END IF;
-      END
-      $$;
-    `);
+    // products: removed job_file_id; no index needed
 
   //  -- product_translations indexes (for fast lookups & search)
     await queryRunner.query(`
@@ -93,6 +84,8 @@ export class AddIndexes1757551166067 implements MigrationInterface {
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_quotations_customer_id" ON "quotations" ("customer_id")';
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_quotations_created_at" ON "quotations" ("created_at")';
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_quotations_quote_number" ON "quotations" ("quote_number")';
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_quotations_notes_en" ON "quotations" ("notes_en")';
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_quotations_notes_ar" ON "quotations" ("notes_ar")';
         END IF;
       END
       $$;
@@ -133,6 +126,8 @@ export class AddIndexes1757551166067 implements MigrationInterface {
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_job_file_id"  ON "invoices" ("job_file_id")';
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_quotation_id" ON "invoices" ("quotation_id")';
           EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_invoice_number" ON "invoices" ("invoice_number")';
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_notes_en" ON "invoices" ("notes_en")';
+          EXECUTE 'CREATE INDEX IF NOT EXISTS "IDX_invoices_notes_ar" ON "invoices" ("notes_ar")';
         END IF;
       END
       $$;
@@ -186,6 +181,8 @@ export class AddIndexes1757551166067 implements MigrationInterface {
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_quotations_quote_number"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_quotations_created_at"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_quotations_customer_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_quotations_notes_en"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_quotations_notes_ar"`);
 
     // invoice_service_details
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_isdet_service_detail_invoice"`);
@@ -203,12 +200,14 @@ export class AddIndexes1757551166067 implements MigrationInterface {
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_job_file_id"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_customer_id"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_created_at"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_notes_en"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_invoices_notes_ar"`);
 
     // Optional client/job_files/products/product_translations indexes
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_pt_language_product"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_pt_language_code"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_pt_product_id"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_products_job_file_id"`);
+    //-- removed products.job_file_id index drop (no longer created)
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_job_files_title"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_clients_name"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_clients_email"`);

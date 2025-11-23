@@ -105,7 +105,8 @@ export class QuotationsService {
         destination: dto.destination ?? null,
         arrival_date: dto.arrival_date ? new Date(dto.arrival_date) : null,
         final_destination: dto.final_destination ?? null,
-        notes: dto.notes ?? null,
+        notes_en: dto.notes_en ?? null,
+        notes_ar: dto.notes_ar ?? null,
         subtotal: subtotal.toFixed(2),
         tax_total: taxTotal.toFixed(2),
         grand_total: grand.toFixed(2),
@@ -195,7 +196,8 @@ export class QuotationsService {
       set("destination", dto.destination ?? base.destination);
       set("arrival_date", dto.arrival_date ? new Date(dto.arrival_date) : base.arrival_date);
       set("final_destination", dto.final_destination ?? base.final_destination);
-      set("notes", dto.notes ?? base.notes);
+      set("notes_en", dto.notes_en ?? base.notes_en);
+      set("notes_ar", dto.notes_ar ?? base.notes_ar);
       set("isInvoiceCreated", dto.isInvoiceCreated);
 
       // replace items if provided

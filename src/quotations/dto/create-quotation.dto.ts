@@ -40,7 +40,8 @@ export class CreateQuotationDto {
   @ApiPropertyOptional() @IsOptional() @IsString() destination?: string;
   @ApiPropertyOptional() @IsOptional() @IsDateString() arrival_date?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() final_destination?: string;
-  @ApiPropertyOptional() @IsOptional() @IsString() notes?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() notes_en?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() notes_ar?: string;
 
   @ApiPropertyOptional({ type: () => [CreateQuotationItemDto] })
   @IsArray() @ArrayMinSize(1)

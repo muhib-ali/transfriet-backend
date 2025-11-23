@@ -27,7 +27,8 @@ export class QuotationDto {
   @ApiProperty({ nullable: true }) destination: string | null;
   @ApiProperty({ nullable: true }) arrival_date: string | null;
   @ApiProperty({ nullable: true }) final_destination: string | null;
-  @ApiProperty({ nullable: true }) notes: string | null;
+  @ApiProperty({ nullable: true }) notes_en: string | null;
+  @ApiProperty({ nullable: true }) notes_ar: string | null;
   @ApiProperty() subtotal: string;
   @ApiProperty() tax_total: string;
   @ApiProperty() grand_total: string;

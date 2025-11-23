@@ -39,7 +39,8 @@ export class UpdateQuotationDto {
   @ApiPropertyOptional() @IsOptional() @IsString() destination?: string | null;
   @ApiPropertyOptional() @IsOptional() @IsDateString() arrival_date?: string | null;
   @ApiPropertyOptional() @IsOptional() @IsString() final_destination?: string | null;
-  @ApiPropertyOptional() @IsOptional() @IsString() notes?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() notes_en?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsString() notes_ar?: string | null;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() isInvoiceCreated?: boolean;
 
   @ApiPropertyOptional({ type: () => [UpdateQuotationItemDto] })

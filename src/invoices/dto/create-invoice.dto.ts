@@ -74,7 +74,10 @@ export class CreateInvoiceDto {
   @IsOptional() @IsString() final_destination?: string;
 
   @ApiPropertyOptional({ type: String })
-  @IsOptional() @IsString() notes?: string;
+  @IsOptional() @IsString() notes_en?: string;
+
+  @ApiPropertyOptional({ type: String })
+  @IsOptional() @IsString() notes_ar?: string;
 
   @ApiProperty({ type: [CreateInvoiceItemDto], description: "Invoice items" })
   @IsArray() @ArrayMinSize(1)

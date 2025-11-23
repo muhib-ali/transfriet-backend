@@ -23,14 +23,7 @@ export class UpdateProductDto {
   @IsOptional()
   price?: number;
 
-  @ApiProperty({
-    example: "123e4567-e89b-12d3-a456-426614174000",
-    required: false,
-    description: "Job file ID",
-  })
-  @IsUUID()
-  @IsOptional()
-  job_file_id?: string | null;
+  // Removed job_file_id; products are no longer linked to job files
 
   @ApiProperty({
     type: [ProductTranslationInputDto],

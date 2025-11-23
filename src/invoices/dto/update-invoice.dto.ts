@@ -76,7 +76,10 @@ export class UpdateInvoiceDto {
   @IsOptional() @IsString() final_destination?: string | null;
 
   @ApiPropertyOptional({ type: String })
-  @IsOptional() @IsString() notes?: string | null;
+  @IsOptional() @IsString() notes_en?: string | null;
+
+  @ApiPropertyOptional({ type: String })
+  @IsOptional() @IsString() notes_ar?: string | null;
 
   @ApiPropertyOptional({ type: [UpdateInvoiceItemDto], description: "Invoice items" })
   @IsOptional()

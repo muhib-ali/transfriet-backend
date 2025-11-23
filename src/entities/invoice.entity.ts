@@ -89,7 +89,10 @@ export class Invoice {
   final_destination: string | null;
 
   @Column({ type: "text", nullable: true })
-  notes: string | null;
+  notes_en: string | null;
+
+  @Column({ type: "text", nullable: true })
+  notes_ar: string | null;
 
   @Column({ type: "numeric", precision: 12, scale: 2, default: 0 })
   subtotal: string;

@@ -209,16 +209,9 @@ export class Init1700000000000 implements MigrationInterface {
         "updated_by" character varying,
         "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-        "price" numeric(10,2) NOT NULL,
-        "job_file_id" uuid
+        "price" numeric(10,2) NOT NULL
+       
       )
-    `);
-
-    await queryRunner.query(`
-      ALTER TABLE "products"
-      ADD CONSTRAINT "FK_products_job_file_id"
-      FOREIGN KEY ("job_file_id") REFERENCES "job_files"("id")
-      ON DELETE SET NULL ON UPDATE NO ACTION;
     `);
 
     await queryRunner.query(`
@@ -289,13 +282,14 @@ export class Init1700000000000 implements MigrationInterface {
         "pieces_or_containers" integer,
         "weight_volume" character varying,
         "cargo_description" character varying,
-        "master_bill_no" character varying,
-        "loading_place" character varying,
-        "departure_date" TIMESTAMP WITH TIME ZONE,
-        "destination" character varying,
-        "arrival_date" TIMESTAMP WITH TIME ZONE,
-        "final_destination" character varying,
-        "notes" text,
+    "master_bill_no" character varying,
+    "loading_place" character varying,
+    "departure_date" TIMESTAMP WITH TIME ZONE,
+    "destination" character varying,
+    "arrival_date" TIMESTAMP WITH TIME ZONE,
+    "final_destination" character varying,
+    "notes_en" text,
+    "notes_ar" text,
 
         "subtotal" numeric(12,2) NOT NULL DEFAULT 0,
         "tax_total" numeric(12,2) NOT NULL DEFAULT 0,
@@ -372,10 +366,11 @@ export class Init1700000000000 implements MigrationInterface {
         "master_bill_no" character varying,
         "loading_place" character varying,
         "departure_date" TIMESTAMP WITH TIME ZONE,
-        "destination" character varying,
-        "arrival_date" TIMESTAMP WITH TIME ZONE,
-        "final_destination" character varying,
-        "notes" text,
+    "destination" character varying,
+    "arrival_date" TIMESTAMP WITH TIME ZONE,
+    "final_destination" character varying,
+    "notes_en" text,
+    "notes_ar" text,
 
         "subtotal" numeric(12,2) NOT NULL DEFAULT 0,
         "tax_total" numeric(12,2) NOT NULL DEFAULT 0,

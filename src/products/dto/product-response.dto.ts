@@ -15,8 +15,7 @@ export class ProductDto {
   @ApiProperty()
   price: number;
 
-  @ApiProperty({ nullable: true })
-  category_id: string | null;
+  // Removed category_id (job_file link)
 
   @ApiProperty({
     description:
