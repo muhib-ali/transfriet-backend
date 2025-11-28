@@ -68,12 +68,21 @@ export class DropdownsService {
     );
   }
 
-     async getAllProducts(): Promise<ApiResponse<any>> {
-    const rows = await this.productRepository.find({
-      where: { is_active: true },
-      relations: ["translations"],
-      order: { created_at: "DESC" }, // ya agar chaho to koi aur order use kar sakte ho
-    });
+      async getAllProducts(search?: string): Promise<ApiResponse<any>> {
+    const qb = this.productRepository
+      .createQueryBuilder("p")
+      .leftJoinAndSelect("p.translations", "t")
+      .where("p.is_active = :isActive", { isActive: true })
+      .orderBy("p.created_at", "DESC")
+      .take(30); // limit thora rakho for performance, zarurat ho tu badha lena
+
+    if (search && search.trim() !== "") {
+      qb.andWhere("LOWER(t.title) LIKE LOWER(:search)", {
+        search: `%${search.trim().toLowerCase()}%`,
+      });
+    }
+
+    const rows = await qb.getMany();
 
     const productsDropdown = rows.map((p) => {
       const en = p.translations?.find((t) => t.language_code === "en");
@@ -82,10 +91,10 @@ export class DropdownsService {
       const priceNumber = Number(p.price);
 
       return {
-        label: en?.title ?? ar?.title ?? "",      // default label, mostly English
-        labelAr: ar?.title ?? undefined,          // optional Arabic label
+        label: en?.title ?? ar?.title ?? "",
+        labelAr: ar?.title ?? undefined,
         value: p.id,
-        price: priceNumber,                       // raw number for FE
+        price: priceNumber,
       };
     });
 
@@ -95,7 +104,6 @@ export class DropdownsService {
       "Dropdowns",
     );
   }
-
   
 
   async getAllTaxes(): Promise<ApiResponse<any>> {

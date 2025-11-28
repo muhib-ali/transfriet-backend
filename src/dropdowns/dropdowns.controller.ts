@@ -1,9 +1,10 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get ,Query} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from "@nestjs/swagger";
 import { DropdownsService } from "./dropdowns.service";
 import {
@@ -49,9 +50,15 @@ export class DropdownsController {
 
     @Get("getAllProducts")
   @ApiOperation({ summary: "Get all active products for dropdown" })
-  @ApiResponse({ status: 200, type: ProductsDropdownResponseDto })
-  async getAllProducts() {
-    return this.dropdownsService.getAllProducts();
+  @ApiQuery({
+    name: "q",
+    required: false,
+    description: "Search text to filter products by title (EN/AR)",
+    example: "iron",
+  })
+   @ApiResponse({ status: 200, type: ProductsDropdownResponseDto })
+  async getAllProducts(@Query("q") q?: string) {
+    return this.dropdownsService.getAllProducts(q);
   }
 
   @Get("getAllTaxes")
